@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "fuzzy-carnival"
+version = "0.1.0"
+description = "The crawler for nlc.cn"
+authors = ["Hung-I Wang <whygowe@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.dev-dependencies]
+black = "^21.5b1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
