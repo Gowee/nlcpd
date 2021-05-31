@@ -6,6 +6,7 @@ authors = ["Hung-I Wang <whygowe@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+Scrapy = "^2.5.0"
 
 [tool.poetry.dev-dependencies]
 black = "^21.5b1"
