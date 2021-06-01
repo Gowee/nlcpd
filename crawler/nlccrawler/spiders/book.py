@@ -35,9 +35,6 @@ class BookSpider(scrapy.Spider):
             callback=self.parse_list_page,
         )
 
-    def parse(self, response):
-        assert False
-
     def parse_list_page(self, response):
         # TODO: terminate on 404
         page = response.meta["page"]
@@ -87,7 +84,7 @@ class BookSpider(scrapy.Spider):
         cover_image_url = response.meta["cover_image_url"]
         # assert book_id == response.css("input#identifier::attr(value)").get() # input are not filled
         # assert collection_name == response.css("input#indexName::attr(value)").get()
-        title = response.css("input#title::attr(value)").get()
+        title = response.css("input#title::attr(value)").get().strip()
         author = response.css("input#author::attr(value)").get()
         introduction = response.css(".SZZY2018_Book .ZhaiYao::text").get().strip()
 
@@ -102,7 +99,7 @@ class BookSpider(scrapy.Spider):
         for vidx, volume in enumerate(
             response.css("#multiple ul li") or [response.css("#single")]
         ):
-            volume_name = volume.css("aa::text").get()  # possibly empty
+            volume_name = volume.css(".aa::text").get()  # possibly empty
             volume_url = volume.css('a[href*="/OpenObjectBook"]::attr(href)').get()
             volume_url_params = dict(parse_qsl(urlparse(volume_url).query))
 
@@ -110,9 +107,26 @@ class BookSpider(scrapy.Spider):
             # volume_id contains a trailing ".0" somewhere
             volume_id = volume_url_params["bid"].removesuffix(".0")
             # volume_url = urljoin(response.url, volume_url)
+
+            yield response.follow(
+                self.URL_VOLUME_READER.format(
+                    collection_id=collection_name.removeprefix("data_"),
+                    volume_id=volume_id,
+                ),
+                priority=self.PRIO_VOLUME,
+                meta={
+                    "collection_name": collection_name,
+                    "page": page,
+                    "book_id": book_id,
+                    "volume_id": volume_id,
+                    "volume_name": volume_name,
+                    "index_in_book": vidx,
+                },
+                callback=self.parse_volume_reader,
+            )
             volumes.append((volume_id, volume_name))
 
-        book = BookItem(
+        yield BookItem(
             id=book_id,
             name=title,
             author=author,
@@ -120,29 +134,11 @@ class BookSpider(scrapy.Spider):
             collection_name=collection_name,
             introduction=introduction,
             misc_metadata=misc_metadata,
-            volumes=[None] * (vidx + 1),
-        )
-
-        yield response.follow(
-            self.URL_VOLUME_READER.format(
-                collection_id=collection_name.removeprefix("data_"), volume_id=volume_id
-            ),
-            priority=self.PRIO_VOLUME,
-            meta={
-                "collection_name": collection_name,
-                "page": page,
-                "book_id": book_id,
-                "pending_book": book,
-                "volume_index": 0,
-                "pending_volumes": volumes,
-            },
-            callback=self.parse_volume_reader,
+            volumes=volumes,
         )
 
     def parse_volume_reader(self, response):
-        volume_id, _volume_name = response.meta["pending_volumes"][
-            response.meta["volume_index"]
-        ]
+        volume_id = response.meta["volume_id"]
         file_path = self.REGEX_PDFNAME_IN_READER.search(response.text)[1]
         response.meta.update({"volume_file_path": file_path})
         yield response.follow(
@@ -156,19 +152,16 @@ class BookSpider(scrapy.Spider):
                 }
             ),
             meta=response.meta,
+            priority=self.PRIO_VOLUME,
             callback=self.parse_volume_toc,
         )
 
     def parse_volume_toc(self, response):
-        collection_name = response.meta["collection_name"]
-        page = response.meta["page"]
         book_id = response.meta["book_id"]
-        pending_book = response.meta["pending_book"]
-        volume_index = response.meta["volume_index"]
-        pending_volumes = response.meta["pending_volumes"]
+        index_in_book = response.meta["index_in_book"]
+        volume_id = response.meta["volume_id"]
+        volume_name = response.meta["volume_name"]
         volume_file_path = response.meta["volume_file_path"]
-
-        volume_id, volume_name = pending_volumes[volume_index]
 
         d = response.json()
         assert d["success"]
@@ -187,29 +180,11 @@ class BookSpider(scrapy.Spider):
             if chapter[0] or chapter[1]:
                 toc.append(chapter)
 
-        pending_book.volumes[volume_index] = VolumeItem(
-            id=volume_id, name=volume_name, file_path=volume_file_path, toc=toc
+        yield VolumeItem(
+            id=volume_id,
+            name=volume_name,
+            file_path=volume_file_path,
+            toc=toc,
+            index_in_book=index_in_book,
+            of_book_id=book_id,
         )
-
-        volume_index += 1
-        if volume_index < len(pending_volumes):
-            yield response.follow(
-                self.URL_VOLUME_READER.format(
-                    collection_id=collection_name.removeprefix("data_"),
-                    volume_id=pending_volumes[volume_index][0],
-                ),
-                priority=self.PRIO_VOLUME + volume_index,  # increase priority
-                meta={
-                    "collection_name": collection_name,
-                    "page": page,
-                    "book_id": book_id,
-                    "pending_book": pending_book,
-                    "volume_index": volume_index,
-                    "pending_volumes": pending_volumes,
-                },
-                callback=self.parse_volume_reader,
-            )
-        else:
-            if not all(pending_book.volumes):
-                self.log(response.meta)
-            yield pending_book

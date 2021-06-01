@@ -4,7 +4,7 @@
 # https://docs.scrapy.org/en/latest/topics/items.html
 
 from dataclasses import dataclass
-
+from typing import Union
 
 @dataclass
 class CategoryItem:
@@ -32,7 +32,7 @@ class BookItem:
     # edition_note_current: str # 现有藏本附注 chirography_300A
     # rb_no: str # 善本书号
     misc_metadata: dict[str, str]  # other miscellaneous metadata entries
-    volumes: list['Volume']
+    volumes: Union[list[(str, str)], list[('Volume')]]
 
 
 @dataclass
@@ -43,3 +43,5 @@ class VolumeItem:
     name: str
     file_path: str  # internal file path of NLC
     toc: list[(str, str)]  # list of chapter number and capther name pairs
+    index_in_book: int
+    of_book_id: str
