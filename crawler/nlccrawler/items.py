@@ -19,11 +19,13 @@ def mongo_item(collection_name=None, to__id=None, upsert_index=None):
             _collection_name = collection_name or cls.__name__
             _to__id = to__id
             _upsert_index = upsert_index
+
         return Wrapper
 
     return wrap
 
-@mongo_item(collection_name="categories", to__id='id', upsert_index=('id',))
+
+@mongo_item(collection_name="categories", to__id="id", upsert_index=("id",))
 @dataclass
 class CategoryItem:
     id: int
@@ -32,7 +34,8 @@ class CategoryItem:
     icon_url: str
     parental_category_name: str
 
-@mongo_item(collection_name="books", upsert_index=('id', 'of_collection_name'))
+
+@mongo_item(collection_name="books", upsert_index=("id", "of_collection_name"))
 @dataclass
 class BookItem:
     """A book consisting of one or more volumes"""
@@ -53,7 +56,7 @@ class BookItem:
     of_collection_name: str  # aid
 
 
-@mongo_item(collection_name="volumes", upsert_index=('id', 'of_collection_name'))
+@mongo_item(collection_name="volumes", upsert_index=("id", "of_collection_name"))
 @dataclass
 class VolumeItem:
     """ "A volume of a book, corresponding to a file"""
