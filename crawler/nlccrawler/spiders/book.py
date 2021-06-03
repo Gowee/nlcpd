@@ -91,7 +91,7 @@ class BookSpider(scrapy.Spider):
         misc_metadata = {}
         for entry in response.css(".SZZY2018_Book .XiangXi label"):
             entry_name = entry.css("::text").get().strip()
-            entry_value = entry.css("span::text").get().strip()
+            entry_value = entry.css("span::text").get(default="").strip()
             misc_metadata[entry_name] = entry_value
 
         volumes = []
@@ -131,7 +131,7 @@ class BookSpider(scrapy.Spider):
             name=title,
             author=author,
             cover_image_url=cover_image_url,
-            collection_name=collection_name,
+            of_collection_name=collection_name,
             introduction=introduction,
             misc_metadata=misc_metadata,
             volumes=volumes,
@@ -157,6 +157,7 @@ class BookSpider(scrapy.Spider):
         )
 
     def parse_volume_toc(self, response):
+        collection_name = response.meta["collection_name"]
         book_id = response.meta["book_id"]
         index_in_book = response.meta["index_in_book"]
         volume_id = response.meta["volume_id"]
@@ -171,8 +172,8 @@ class BookSpider(scrapy.Spider):
         for chapter in chain(
             *map(
                 lambda row: (
-                    (row["chapter_num1"], row["chapter_name1"]),
-                    (row["chapter_num2"], row["chapter_name2"]),
+                    (row.get("chapter_num1"), row.get("chapter_name1")),
+                    (row.get("chapter_num2"), row.get("chapter_name2")),
                 ),
                 d["obj"],
             )
@@ -187,4 +188,5 @@ class BookSpider(scrapy.Spider):
             toc=toc,
             index_in_book=index_in_book,
             of_book_id=book_id,
+            of_collection_name=collection_name,
         )
