@@ -14,7 +14,7 @@ NEWSPIDER_MODULE = "nlccrawler.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-# USER_AGENT = 'nlccrawler (+http://www.yourdomain.com)'
+# USER_AGENT = 'nlccrawler (+https://github.com/Gowee/nlcpd)'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True

@@ -101,14 +101,17 @@ class Downloader:
             ],
         )
 
-        return (Volume(
-            id=file_id,
-            file_path=file_path,
-            book_id=book_id,
-            book_title=book_title,
-            press_name=press,
-            collection_id=collection_id,
-        ), (token_key, time_key, time_flag))
+        return (
+            Volume(
+                id=file_id,
+                file_path=file_path,
+                book_id=book_id,
+                book_title=book_title,
+                press_name=press,
+                collection_id=collection_id,
+            ),
+            (token_key, time_key, time_flag),
+        )
 
     @asynccontextmanager
     async def download(self, aid: str, bid: str, key_triple: Tuple[str, str, str]):
@@ -122,7 +125,9 @@ class Downloader:
         finally:
             await req_ctx.__aexit__()
 
+
 downloader = Downloader(USERNAME, PASSWORD, solve_captcha)
+
 
 async def handle_download(aid, bid):
     await downloader.ensure_ready()
