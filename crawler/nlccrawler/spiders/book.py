@@ -140,7 +140,10 @@ class BookSpider(scrapy.Spider):
 
     def parse_volume_reader(self, response):
         volume_id = response.meta["volume_id"]
-        file_path = self.REGEX_PDFNAME_IN_READER.search(response.text)[1]
+        try:
+            file_path = self.REGEX_PDFNAME_IN_READER.search(response.text)[1]
+        except TypeError:
+            file_path = None
         response.meta.update({"volume_file_path": file_path})
         yield response.follow(
             self.URL_VOLUME_TOC,

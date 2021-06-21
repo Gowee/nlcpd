@@ -4,7 +4,7 @@
 # https://docs.scrapy.org/en/latest/topics/items.html
 
 from dataclasses import dataclass
-from typing import Union
+from typing import Union, Optional
 import functools
 
 
@@ -64,7 +64,7 @@ class VolumeItem:
 
     id: str  # bid
     name: str
-    file_path: str  # internal file path of NLC
+    file_path: Optional[str]  # internal file path of NLC
     toc: list[(str, str)]  # list of chapter number and capther name pairs
     index_in_book: int
     of_book_id: str
