@@ -89,9 +89,8 @@ class BookSpider(scrapy.Spider):
         introduction = response.css(".SZZY2018_Book .ZhaiYao::text").get().strip()
 
         misc_metadata = {}
-        for entry in response.css(".SZZY2018_Book .XiangXi label"):
-            entry_name = entry.css("::text").get().strip()
-            entry_value = entry.css("span::text").get(default="").strip()
+        for entry in response.css(".SZZY2018_Book .XiangXi label").xpath("string()"):
+            entry_name, entry_value = map(str.strip, entry.get().split("：", maxsplit=1))
             misc_metadata[entry_name] = entry_value
 
         volumes = []
