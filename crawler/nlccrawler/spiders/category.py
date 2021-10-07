@@ -1,7 +1,7 @@
 import scrapy
 import re
 import logging
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse, parse_qs
 
 from ..items import CategoryItem
 
@@ -10,6 +10,7 @@ class CategorySpider(scrapy.Spider):
     name = "category"
     allowed_domains = ["read.nlc.cn"]
     start_urls = ["http://read.nlc.cn/user/category"]
+    # custom_settings = {'ITEM_PIPELINES': {}}
 
     REGEX_SEARCH_TYPE = re.compile(r"searchType=(\d+)&")
 
@@ -33,6 +34,7 @@ class CategorySpider(scrapy.Spider):
                         "category": CategoryItem(
                             id=id,
                             name=name,
+                            collection_name=None,
                             description=None,
                             icon_url=icon_url,
                             parental_category_name=pcategory_name,
@@ -45,4 +47,13 @@ class CategorySpider(scrapy.Spider):
         description = response.css(".YMH2019_New_GJG_DataJJ .txt p::text").get()
         if description:
             category.description = description.strip()
+        first_book_link = response.css(
+            'ul > li:first-child a[href*="searchDetail"][href*="indexName"]'
+        )
+        if first_book_link:
+            category.collection_name = parse_qs(
+                urlparse(first_book_link.attrib["href"]).query
+            ).get("indexName")[0]
+        else:
+            self.log(f"No book found under {category.name}({category.id})")
         yield category

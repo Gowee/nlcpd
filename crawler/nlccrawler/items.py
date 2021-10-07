@@ -9,6 +9,18 @@ import functools
 
 
 def mongo_item(collection_name=None, to__id=None, upsert_index=None):
+    """
+    A decorator for Item classes that instructs the TxMongoPipeline to store
+    items properly
+
+    Args:
+        collection_name : Required. O.W., `TxMongoPipeline` just ignores the
+            item.
+        to__id : a field to be renamed to `_id`, which is optional.
+        upsert_index : a tuple of fields be used as the criteria when upserting.
+            Without this, upserting is disabled.
+    """
+
     def wrap(cls):
         # TODO: validate fields specified in upsert_index
         # for field in upsert_index:
@@ -25,11 +37,12 @@ def mongo_item(collection_name=None, to__id=None, upsert_index=None):
     return wrap
 
 
-@mongo_item(collection_name="categories", to__id="id", upsert_index=("id",))
+@mongo_item(collection_name="categories", to__id="id", upsert_index=("_id",))
 @dataclass
 class CategoryItem:
     id: int
     name: str
+    collection_name: str
     description: str
     icon_url: str
     parental_category_name: str

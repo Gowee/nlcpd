@@ -86,7 +86,12 @@ class BookSpider(scrapy.Spider):
         # assert collection_name == response.css("input#indexName::attr(value)").get()
         title = response.css("input#title::attr(value)").get().strip()
         author = response.css("input#author::attr(value)").get()
-        keywords = response.css("input#Keyword::attr(value)").get().replace("@@@", "").split("###")
+        keywords = (
+            response.css("input#Keyword::attr(value)")
+            .get()
+            .replace("@@@", "")
+            .split("###")
+        )
         introduction = response.css(".SZZY2018_Book .ZhaiYao::text").get().strip()
 
         misc_metadata = {}
