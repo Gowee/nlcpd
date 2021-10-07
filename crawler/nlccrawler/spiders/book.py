@@ -86,11 +86,19 @@ class BookSpider(scrapy.Spider):
         # assert collection_name == response.css("input#indexName::attr(value)").get()
         title = response.css("input#title::attr(value)").get().strip()
         author = response.css("input#author::attr(value)").get()
-        keywords = (
-            response.css("input#Keyword::attr(value)")
-            .get()
-            .replace("@@@", "")
-            .split("###")
+        keywords = response.css("input#Keyword::attr(value)").get(
+            default=response.css("input#subject::attr(value)").get(default=None)
+        )
+        if keywords:
+            keywords = keywords.replace("@@@", "").split("###")
+        else:
+            self.log(f"No keywrods found for {collection_name}, {book_id}")
+            keywords = None if keywords is None else []
+        category_name = (
+            response.css('.YMH2019_New_MBX a[href*="/allSearch/searchList"]::text')
+            .get(default="")
+            .strip()
+            or None
         )
         introduction = response.css(".SZZY2018_Book .ZhaiYao::text").get().strip()
 
@@ -136,6 +144,7 @@ class BookSpider(scrapy.Spider):
             name=title,
             author=author,
             cover_image_url=cover_image_url,
+            of_category_name=category_name,
             of_collection_name=collection_name,
             introduction=introduction,
             keywords=keywords,

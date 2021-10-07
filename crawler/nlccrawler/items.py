@@ -64,9 +64,10 @@ class BookItem:
     # edition_note_historical: str # 版本书目史注 chirography
     # edition_note_current: str # 现有藏本附注 chirography_300A
     # rb_no: str # 善本书号
-    keywords: list[str]
+    keywords: Optional[list[str]]
     misc_metadata: dict[str, str]  # other miscellaneous metadata entries
     volumes: Union[list[(str, str)], list[("Volume")]]
+    of_category_name: Optional[str]
     of_collection_name: str  # aid
 
 
