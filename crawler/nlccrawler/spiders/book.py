@@ -158,6 +158,7 @@ class BookSpider(scrapy.Spider):
             file_path = self.REGEX_PDFNAME_IN_READER.search(response.text)[1]
         except TypeError:
             file_path = None
+            self.log(f"file_path not found for {volume_id}", level=logging.WARNING)
         response.meta.update({"volume_file_path": file_path})
         yield response.follow(
             self.URL_VOLUME_TOC,

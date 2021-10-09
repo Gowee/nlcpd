@@ -4,9 +4,26 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from scrapy.spidermiddlewares.httperror import HttpError
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
+
+
+class FixHttpStatusDownloaderMiddleware:
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls()  # cls(crawler.settings)
+
+    def process_response(self, request, response, spider):
+        if (
+            200 <= response.status < 300
+            and len(response.body) < 1024
+            and "系统内部错误".encode("utf-8") in response.body
+            and b"nlc.cn" not in response.body
+        ):
+            response.status = 500
+        return response
 
 
 class NlccrawlerSpiderMiddleware:
