@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "uploader"
+version = "0.1.0"
+description = ""
+authors = ["Hung-I Wang <whygowe@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pymongo = "^3.11.4"
+mwclient = "^0.10.1"
+PyYAML = "^5.4.1"
+opencc-py = "^1.1.0"
+
+[tool.poetry.dev-dependencies]
+black = "^21.5b2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
