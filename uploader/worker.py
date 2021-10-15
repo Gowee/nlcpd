@@ -61,7 +61,7 @@ def main():
     site = mwclient.Site("commons.wikimedia.org")
     site.login(username, password)
     site.requests["timeout"] = 125
-    site.chunk_size = 1024 * 1024 * 20
+    site.chunk_size = 1024 * 1024 * 97
     # print(f"data.{config['batch']}")
     # print(dir(__import__(f"data.{config['batch']}")))
     tasks = __import__(config["batch"]).tasks()
@@ -122,9 +122,9 @@ def main():
             print(f'{"Updating" if rewriting else "Creating"} page {task["name"]}')
             # page = site.pages[task['name']]
             assert not page.exists or rewriting
-            page.edit(task["text"], task["comment"] + " (Rewriting)")
+            page.edit(task["text"], task["comment"] + (" (Rewriting)" if rewriting else ""))
         store_position(task["name"])
-        input("< Paused. Press to proceed. >")
+        # input("< Paused. Press to proceed. >")
 
     # for book in books:
     #     to_create_category = len(volumes) > 1 # TODO: refactor

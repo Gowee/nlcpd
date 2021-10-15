@@ -108,13 +108,15 @@ def tasks():
 [[Category:Books in the Yunnan Provincial Library]]
 [[Category:Books from the National Library of China]]
     """ % (
-                title,
+                book["misc_metadata"]["版本项"]
+                if title in mappings["categories"]
+                else title,
                 introduction if introduction else "",
             )
             yield {
                 "name": wiki_category,
                 "text": category_wikitext,
-                "comment": f"Create category for {title} (batch task; nlc:{volume['of_collection_name']},{book['id']}; [[Category:National_Library_of_China-Yunnan_Provincial_Library_Ancient_Books|雲南圖書館古籍]])",
+                "comment": f"Create category for {title} (batch task; nlc:{book['of_collection_name']},{book['id']}; [[Category:National_Library_of_China-Yunnan_Provincial_Library_Ancient_Books|雲南圖書館古籍]])",
             }
         volumes = book["volumes"]
         for idx, volume in zip(range(1, len(volumes) + 1), volumes):
