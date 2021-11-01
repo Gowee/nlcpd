@@ -122,7 +122,9 @@ def main():
             print(f'{"Updating" if rewriting else "Creating"} page {task["name"]}')
             # page = site.pages[task['name']]
             assert not page.exists or rewriting
-            page.edit(task["text"], task["comment"] + (" (Rewriting)" if rewriting else ""))
+            page.edit(
+                task["text"], task["comment"] + (" (Rewriting)" if rewriting else "")
+            )
         store_position(task["name"])
         # input("< Paused. Press to proceed. >")
 

@@ -108,9 +108,12 @@ def tasks():
 [[Category:Books in the Yunnan Provincial Library]]
 [[Category:Books from the National Library of China]]
     """ % (
-                book["misc_metadata"]["版本项"]
-                if title in mappings["categories"]
-                else title,
+                title
+                + (
+                    (" " + book["misc_metadata"]["版本项"])
+                    if title in mappings["categories"]
+                    else ""
+                ),
                 introduction if introduction else "",
             )
             yield {
