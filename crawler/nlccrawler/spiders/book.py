@@ -194,7 +194,7 @@ class BookSpider(scrapy.Spider):
                     (row.get("chapter_num1"), row.get("chapter_name1")),
                     (row.get("chapter_num2"), row.get("chapter_name2")),
                 ),
-                d["obj"],
+                d["obj"] or [],
             )
         ):
             if chapter[0] or chapter[1]:
