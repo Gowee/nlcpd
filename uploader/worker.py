@@ -61,7 +61,7 @@ def main():
     site = mwclient.Site("commons.wikimedia.org")
     site.login(username, password)
     site.requests["timeout"] = 125
-    site.chunk_size = 1024 * 1024 * 97
+    site.chunk_size = 1024 * 1024 * 64
     # print(f"data.{config['batch']}")
     # print(dir(__import__(f"data.{config['batch']}")))
     tasks = __import__(config["batch"]).tasks()
@@ -107,17 +107,21 @@ def main():
                 )
             else:
                 if type(file) == bytes:
-                    print("File size: ", len(file))
+                    print("\tFile size: ", len(file))
                     file = BytesIO(file)
                 if hasattr(file, "read"):
-                    site.upload(
+                    res = site.upload(
                         file,
                         filename=task["name"],
                         description=task["text"],
                         comment=task["comment"],
                     )
+                    if not res.get("upload", res).get("result") == "Success":
+                        print(res)
+                        assert False
                 else:
                     assert False
+                print("\tDone")
         else:
             print(f'{"Updating" if rewriting else "Creating"} page {task["name"]}')
             # page = site.pages[task['name']]
