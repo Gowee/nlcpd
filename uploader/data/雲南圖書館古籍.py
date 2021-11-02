@@ -4,6 +4,7 @@ import re
 import os
 from tempfile import TemporaryFile
 import sys
+from math import log, floor
 from collections import OrderedDict
 
 import requests
@@ -57,6 +58,7 @@ def gen_toc(toc):
     contents = " <br/>\n".join(lines)
     if contents:
         contents = "<p>\n" + contents + "\n</p>"
+        contents += "\n<!--The toc provided by NLC may have some volumes missed. To be corrected.-->"
     return contents
 
 
@@ -82,7 +84,17 @@ def tasks():
     with open(MAPPINGS_FILE_PATH, "r") as f:
         mappings = yaml.load(f.read())
 
+    gen_filename_base = lambda book: f"{book['name']} ({book['misc_metadata']['版本项']})"
+
     for book in books:
+        if int(book["id"]) == 290100101:
+            # only starting this book, we use the new naming convention
+            # previous filenames are kept as-is
+            gen_filename_base = (
+                lambda book: (f"{book['name']} ({book['misc_metadata']['版本项']})")
+                if " " in book["misc_metadata"]["版本项"]
+                else f"{book['name']} {book['misc_metadata']['版本项']}"
+            )
         title, note = split_name(book["name"])
         if book["author"].strip() != book["misc_metadata"]["责任者"].strip():
             print(book)
@@ -93,11 +105,10 @@ def tasks():
         #     print(book, re.sub("\s+", " ", book['author']).strip(), book['misc_metadata']['责任者'])
         wiki_category = None
         category_wikitext = None
+        mapping = mappings.get(int(book["id"]), None)
         if len(book["volumes"]) > 1:
             wiki_category = "Category:" + (
-                mappings["categories"][title]
-                if title in mappings["categories"]
-                else title
+                mapping[0] if mapping and mapping[0] else title
             )
 
             category_wikitext = """{{Category for book|zh}}
@@ -107,14 +118,15 @@ def tasks():
 [[Category:Books in Chinese]]
 [[Category:Books in the Yunnan Provincial Library]]
 [[Category:Books from the National Library of China]]
-    """ % (
+%s""" % (
                 title
                 + (
                     (" " + book["misc_metadata"]["版本项"])
-                    if title in mappings["categories"]
+                    if book["id"] in mappings and mapping[0]
                     else ""
                 ),
                 introduction if introduction else "",
+                f"[[Category:{title}]]\n" if mapping and mapping[0] else "",
             )
             yield {
                 "name": wiki_category,
@@ -132,11 +144,7 @@ def tasks():
                 metadata["版本书目史注"]
             )  # + f"<!--original: {metadata['版本书目史注']}-->"
             filename = (
-                (
-                    mappings["filenames"][book["name"]]
-                    if book["name"] in mappings["filenames"]
-                    else book["name"]
-                )
+                (mapping[1] if mapping and mapping[1] else gen_filename_base(book))
                 + (" " + volume["name"] if len(volumes) > 1 else "")
                 + ".pdf"
             )
@@ -167,7 +175,7 @@ def tasks():
                         aid=int(volume["of_collection_name"].removeprefix("data_")),
                         bid=volume["id"],
                     )
-
+            sort_key = "|" + str(idx).zfill(floor(log(len(volumes), 10)))
             volume_wikitext = f"""=={{{{int:filedesc}}}}==
 {{{{National_Library_of_China-Yunnan_Provincial_Library_Ancient_Books
   |byline={byline}
@@ -188,7 +196,7 @@ def tasks():
 =={{{{int:license-header}}}}==
 {{{{PD-NLC-Ancient Books}}}}
 """ + (
-                f"\n[[{wiki_category}]]\n" if wiki_category else ""
+                f"\n[[{wiki_category}{sort_key}]]\n" if wiki_category else ""
             )
             yield {
                 "name": filename,
