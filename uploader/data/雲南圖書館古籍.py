@@ -84,7 +84,7 @@ def tasks():
     with open(MAPPINGS_FILE_PATH, "r") as f:
         mappings = yaml.load(f.read())
 
-    gen_filename_base = lambda book: f"{book['name']} ({book['misc_metadata']['版本项']})"
+    gen_filename_base = lambda book: f"{book['name']}"
 
     for book in books:
         if int(book["id"]) == 290100101:
