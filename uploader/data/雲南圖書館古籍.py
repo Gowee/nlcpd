@@ -123,7 +123,7 @@ def tasks():
                 title
                 + (
                     (" " + book["misc_metadata"]["版本项"])
-                    if book["id"] in mappings and mapping[0]
+                    if int(book["id"]) in mappings and mapping[0]
                     else ""
                 ),
                 introduction if introduction else "",
