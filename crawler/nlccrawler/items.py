@@ -4,7 +4,7 @@
 # https://docs.scrapy.org/en/latest/topics/items.html
 
 from dataclasses import dataclass
-from typing import Union, Optional
+from typing import Union, Optional, Tuple
 import functools
 
 
@@ -66,7 +66,8 @@ class BookItem:
     # rb_no: str # 善本书号
     keywords: Optional[list[str]]
     misc_metadata: dict[str, str]  # other miscellaneous metadata entries
-    volumes: Union[list[(str, str)], list[("Volume")]]
+    volumes: Union[list[Tuple[str, str]], list[("VolumeItem")]]
+    of_category_id: Optional[str]  # searchType
     of_category_name: Optional[str]
     of_collection_name: str  # aid
 
@@ -79,7 +80,7 @@ class VolumeItem:
     id: str  # bid
     name: str
     file_path: Optional[str]  # internal file path of NLC
-    toc: list[(str, str)]  # list of chapter number and capther name pairs
+    toc: list[Tuple[str, str]]  # list of chapter number and capther name pairs
     index_in_book: int
     of_book_id: str
     of_collection_name: str

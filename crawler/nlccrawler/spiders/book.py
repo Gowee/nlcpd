@@ -22,7 +22,7 @@ class BookSpider(scrapy.Spider):
     PRIO_BOOK_INFO = 20
     PRIO_VOLUME = 30
 
-    def __init__(self, category, starting_page=1, *args, **kwargs):
+    def __init__(self, category, starting_page=1, no_volume=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.category = category
         self.starting_page = starting_page
@@ -121,22 +121,23 @@ class BookSpider(scrapy.Spider):
             volume_id = volume_url_params["bid"].removesuffix(".0")
             # volume_url = urljoin(response.url, volume_url)
 
-            yield response.follow(
-                self.URL_VOLUME_READER.format(
-                    collection_id=collection_name.removeprefix("data_"),
-                    volume_id=volume_id,
-                ),
-                priority=self.PRIO_VOLUME,
-                meta={
-                    "collection_name": collection_name,
-                    "page": page,
-                    "book_id": book_id,
-                    "volume_id": volume_id,
-                    "volume_name": volume_name,
-                    "index_in_book": vidx,
-                },
-                callback=self.parse_volume_reader,
-            )
+            if not self.no_volume:
+                yield response.follow(
+                    self.URL_VOLUME_READER.format(
+                        collection_id=collection_name.removeprefix("data_"),
+                        volume_id=volume_id,
+                    ),
+                    priority=self.PRIO_VOLUME,
+                    meta={
+                        "collection_name": collection_name,
+                        "page": page,
+                        "book_id": book_id,
+                        "volume_id": volume_id,
+                        "volume_name": volume_name,
+                        "index_in_book": vidx,
+                    },
+                    callback=self.parse_volume_reader,
+                )
             volumes.append((volume_id, volume_name))
 
         yield BookItem(
@@ -144,6 +145,7 @@ class BookSpider(scrapy.Spider):
             name=title,
             author=author,
             cover_image_url=cover_image_url,
+            of_category_id=self.category,
             of_category_name=category_name,
             of_collection_name=collection_name,
             introduction=introduction,
