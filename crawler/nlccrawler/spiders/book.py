@@ -112,7 +112,8 @@ class BookSpider(scrapy.Spider):
         for vidx, volume in enumerate(
             response.css("#multiple ul li") or [response.css("#single")]
         ):
-            volume_name = volume.css(".aa::text").get()  # possibly empty
+            # possibly empty; aa: 云南图书馆, tt: 宋人文集
+            volume_name = volume.css(".aa::text, .tt::text, span::text").get()
             volume_url = volume.css('a[href*="/OpenObjectBook"]::attr(href)').get()
             volume_url_params = dict(parse_qsl(urlparse(volume_url).query))
 
