@@ -28,6 +28,7 @@ def call(command, *args, **kwargs):
     kwargs["shell"] = True
     return subprocess.check_call(command, *args, **kwargs)
 
+
 def load_position():
     if os.path.exists(POSITION_FILE_PATH):
         with open(POSITION_FILE_PATH, "r") as f:
@@ -52,9 +53,13 @@ def gen_toc(toc):
         contents += "\n<!--The toc provided by NLC may have some volumes missed. To be corrected.-->"
     return contents
 
+
 def getbook_unified(volume):
     # if "fileiplogger.info("Failed to get file by path: " + str(e), ", fallbacking to getbook")
-    return BytesIO(getbook(volume["of_collection_name"].removeprefix("data_"), volume['id']))
+    return BytesIO(
+        getbook(volume["of_collection_name"].removeprefix("data_"), volume["id"])
+    )
+
 
 def main():
     import sys, os
@@ -71,13 +76,13 @@ def main():
 
     with open(os.path.join(DATA_DIR, config["batch"] + ".json")) as f:
         batch = json.load(f)
-    template = config['template']
-    batch_link = config['batch_link'] or config["batch"]
+    template = config["template"]
+    batch_link = config["batch_link"] or config["batch"]
 
     last_position = load_position()
 
-    batch = iter(batch)
     if last_position is not None:
+        batch = iter(batch)
         print(f"Last processed: {last_position}")
         next(
             itertools.dropwhile(lambda book: str(book["id"]) != last_position, batch)
@@ -88,10 +93,11 @@ def main():
         byline = book["author"]
         title = book["name"]
         volumes = book["volumes"]
-        metadata = book['misc_metadata']
+        volumes.sort(key=lambda e: e["index_in_book"])
+        metadata = book["misc_metadata"]
         dbid = book["of_collection_name"].removeprefix("data_")
         additional_fields = "\n".join(f"  |{k}={v}" for k, v in metadata.items())
-        category_page = site.pages['Category:' + title]
+        category_page = site.pages["Category:" + title]
         # TODO: for now we do not create a seperated category suffixed with the edition
         if not category_page.exists:
             category_wikitext = """{{Wikidata Infobox}}
@@ -99,17 +105,21 @@ def main():
 {{zh|%s}}
 
 [[Category:Chinese-language books by title]]
-"""         
-            category_page.edit(category_wikitext, f"Creating (batch task; nlc:{book['of_collection_name']},{book['id']})")
-
+"""
+            category_page.edit(
+                category_wikitext,
+                f"Creating (batch task; nlc:{book['of_collection_name']},{book['id']})",
+            )
         for ivol, volume in enumerate(volumes):
             byline = book["author"]
             title = book["name"]
-            description =  "\n".join(
+            description = "\n".join(
                 filter(lambda v: v, [book["introduction"], gen_toc(volume["toc"])])
             )
-            volume_name = (volume['name'] or f"第{ivol+1}冊") if len(volumes) > 1 else ""
-            volume_name_wps = (" " + volume_name ) if volume_name else "" # with preceding space
+            volume_name = (volume["name"] or f"第{ivol+1}冊") if len(volumes) > 1 else ""
+            volume_name_wps = (
+                (" " + volume_name) if volume_name else ""
+            )  # with preceding space
             volume_wikitext = f"""=={{{{int:filedesc}}}}==
 {{{{{template}
   |byline={byline}
@@ -130,17 +140,16 @@ def main():
             if not page.exists:
                 logger.info(f"Uploading {pagename}")
                 site.upload(
-                        getbook_unified(volume),
-                        filename=filename,
-                        description=volume_wikitext,
-                        comment=comment,
-                    )
+                    getbook_unified(volume),
+                    filename=filename,
+                    description=volume_wikitext,
+                    comment=comment,
+                )
             else:
                 logger.info(f"{pagename} exists, upading wikitext")
-                page.edit(
-                    volume_wikitext, comment + " (Updating)"
-                )
-        store_position(book['id'])
+                page.edit(volume_wikitext, comment + " (Updating)")
+        store_position(book["id"])
+
 
 if __name__ == "__main__":
     main()
