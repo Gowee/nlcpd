@@ -83,7 +83,7 @@ def getbook_unified(volume):
     )
 
 
-def fix_bookname_in_filename(bookname):
+def fix_bookname_in_pagename(bookname):
     if bookname.startswith("[") and bookname.endswith("]"):  # [四家四六]
         bookname = bookname[1:-1]
     if bookname.startswith("["):
@@ -127,7 +127,7 @@ def main():
         metadata = book["misc_metadata"]
         dbid = book["of_collection_name"].removeprefix("data_")
         additional_fields = "\n".join(f"  |{k}={v}" for k, v in metadata.items())
-        category_page = site.pages["Category:" + title]
+        category_page = site.pages["Category:" + fix_bookname_in_pagename(title)]
         # TODO: for now we do not create a seperated category suffixed with the edition
         if not category_page.exists:
             category_wikitext = """{{Wikidata Infobox}}
@@ -164,7 +164,7 @@ def main():
 {additional_fields}
 }}}}"""
             comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {byline} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[Category:{title}|{title}]])"
-            filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_filename(book["name"])}{volume_name_wps}.pdf'
+            filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
             pagename = "File:" + filename
             page = site.pages[pagename]
             if not page.exists:

@@ -1,9 +1,18 @@
 import yaml
 import os
+import re
 import json
 
 CONFIG_FILE_PATH = "./config.yml"
 DATA_DIR = os.path.join(os.getcwd(), "data")
+
+
+def fix_bookname_in_pagename(bookname):
+    if bookname.startswith("[") and bookname.endswith("]"):  # [四家四六]
+        bookname = bookname[1:-1]
+    if bookname.startswith("["):
+        bookname = re.sub(r"\[(.+?)\]", r"〔\1〕", bookname)  # [宋]...
+    return bookname
 
 
 def main():
@@ -33,7 +42,7 @@ def main():
             volume_name_wps = (
                 (" " + volume_name) if volume_name else ""
             )  # with preceding space
-            filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {book["name"]}{volume_name_wps}.pdf'
+            filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
             pagename = "File:" + filename
             lines.append(f"** [[:{pagename}]]")
 
