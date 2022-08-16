@@ -164,7 +164,7 @@ def main():
 {additional_fields}
 }}}}
 
-[[category_page]]
+[[{category_page}]]
 """
             comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {byline} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[Category:{title}|{title}]])"
             filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
