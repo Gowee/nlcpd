@@ -7,6 +7,7 @@ import logging
 from io import BytesIO
 import os
 import functools
+import re
 
 import requests
 import yaml
@@ -82,6 +83,14 @@ def getbook_unified(volume):
     )
 
 
+def fix_bookname_in_filename(bookname):
+    if bookname.startswith("[") and bookname.endswith("]"):  # [四家四六]
+        bookname = bookname[1:-1]
+    if bookname.startswith("["):
+        bookname = re.sub(r"\[(.+?)\]", r"〔\1〕", bookname)  # [宋]...
+    return bookname
+
+
 def main():
     import sys, os
 
@@ -155,14 +164,14 @@ def main():
 {additional_fields}
 }}}}"""
             comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {byline} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[Category:{title}|{title}]])"
-            filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {book["name"]}{volume_name_wps}.pdf'
+            filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_filename(book["name"])}{volume_name_wps}.pdf'
             pagename = "File:" + filename
             page = site.pages[pagename]
             if not page.exists:
                 logger.info(f"Uploading {pagename}")
 
                 @retry(3)
-                def do():
+                def do1():
                     return site.upload(
                         getbook_unified(volume),
                         filename=filename,
@@ -170,10 +179,15 @@ def main():
                         comment=comment,
                     )
 
-                do()
+                do1()
             else:
                 logger.info(f"{pagename} exists, upading wikitext")
-                page.edit(volume_wikitext, comment + " (Updating)")
+
+                @retry(3)
+                def do2():
+                    page.edit(volume_wikitext, comment + " (Updating)")
+
+                do2()
         store_position(book["id"])
 
 
