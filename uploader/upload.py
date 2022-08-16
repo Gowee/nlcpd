@@ -6,11 +6,13 @@ import json
 import logging
 from io import BytesIO
 import os
-from getbook import getbook
-import requests
+import functools
 
+import requests
 import yaml
 import mwclient
+
+from getbook import getbook
 
 CONFIG_FILE_PATH = "./config.yml"
 POSITION_FILE_PATH = "./.position"
@@ -40,6 +42,25 @@ def load_position():
 def store_position(position):
     with open(POSITION_FILE_PATH, "w") as f:
         f.write(position)
+
+
+def retry(times=3):
+    def wrapper(fn):
+        tried = 0
+
+        @functools.wraps(fn)
+        def wrapped(*args, **kwargs):
+            try:
+                return fn(*args, **kwargs)
+            except Exception as e:
+                nonlocal tried
+                tried += 1
+                if tried == times:
+                    raise Exception(f"Failed finally after {times} tries") from e
+
+        return wrapped
+
+    return wrapper
 
 
 def gen_toc(toc):
@@ -139,12 +160,17 @@ def main():
             page = site.pages[pagename]
             if not page.exists:
                 logger.info(f"Uploading {pagename}")
-                site.upload(
-                    getbook_unified(volume),
-                    filename=filename,
-                    description=volume_wikitext,
-                    comment=comment,
-                )
+
+                @retry(3)
+                def do():
+                    return site.upload(
+                        getbook_unified(volume),
+                        filename=filename,
+                        description=volume_wikitext,
+                        comment=comment,
+                    )
+
+                do()
             else:
                 logger.info(f"{pagename} exists, upading wikitext")
                 page.edit(volume_wikitext, comment + " (Updating)")
