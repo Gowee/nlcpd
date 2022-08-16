@@ -26,6 +26,7 @@ class BookSpider(scrapy.Spider):
         super().__init__(*args, **kwargs)
         self.category = category
         self.starting_page = starting_page
+        self.no_volume = no_volume
 
     def start_requests(self):
         yield scrapy.Request(
