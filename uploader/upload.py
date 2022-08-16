@@ -120,7 +120,7 @@ def main():
         # TODO: peek and report?
 
     for book in batch:
-        byline = book["author"]
+        byline = re.sub(r"\[(.+?)\]", r"〔\1〕", book["author"])
         title = book["name"]
         volumes = book["volumes"]
         volumes.sort(key=lambda e: e["index_in_book"])
