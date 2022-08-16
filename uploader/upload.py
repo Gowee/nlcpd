@@ -142,8 +142,6 @@ def main():
                 f"Creating (batch task; nlc:{book['of_collection_name']},{book['id']})",
             )
         for ivol, volume in enumerate(volumes):
-            byline = book["author"]
-            title = book["name"]
             description = "\n".join(
                 filter(lambda v: v, [book["introduction"], gen_toc(volume["toc"])])
             )
