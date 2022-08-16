@@ -127,7 +127,8 @@ def main():
         metadata = book["misc_metadata"]
         dbid = book["of_collection_name"].removeprefix("data_")
         additional_fields = "\n".join(f"  |{k}={v}" for k, v in metadata.items())
-        category_page = site.pages["Category:" + fix_bookname_in_pagename(title)]
+        category_name = "Category:" + fix_bookname_in_pagename(title)
+        category_page = site.pages[category_name]
         # TODO: for now we do not create a seperated category suffixed with the edition
         if not category_page.exists:
             category_wikitext = """{{Wikidata Infobox}}
@@ -164,7 +165,7 @@ def main():
 {additional_fields}
 }}}}
 
-[[{category_page}]]
+[[{category_name}]]
 """
             comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {byline} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[Category:{title}|{title}]])"
             filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
@@ -184,11 +185,11 @@ def main():
 
                 do1()
             else:
-                logger.info(f"{pagename} exists, upading wikitext")
+                logger.info(f"{pagename} exists, updating wikitext")
 
                 @retry(3)
                 def do2():
-                    page.edit(volume_wikitext, comment + " (Updating)")
+                    page.edit(volume_wikitext, comment + " (Updating metadata)")
 
                 do2()
         store_position(book["id"])
