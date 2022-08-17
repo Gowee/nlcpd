@@ -50,7 +50,15 @@ class BookSpider(scrapy.Spider):
             response.css('ul > li a[href^="/allSearch/searchDetail"]:nth-of-type(1)')
         ):
             title = book.xpath("..").css(".tt").xpath("text()").get()
-            brief = "\n".join(filter(None, map(lambda s: s.strip(), book.xpath("..").css(".txt *::text").getall())))
+            brief = "\n".join(
+                filter(
+                    None,
+                    map(
+                        lambda s: s.strip(),
+                        book.xpath("..").css(".txt *::text").getall(),
+                    ),
+                )
+            )
             url = book.attrib["href"]
             url_params = dict(parse_qsl(urlparse(url).query))
             url = urljoin(self.URL_LIST_PAGE, url)
@@ -84,14 +92,15 @@ class BookSpider(scrapy.Spider):
                     callback=self.parse_book_info,
                 )
 
-        yield PageItem(
-            no=page,
-            books=books_in_page,
-            of_category_id=self.category,
-            of_category_name=category_name,
-        )
         self.log(f"Got {idx + 1} books on page {page}")
         if idx != -1:
+            # page contains > 0 books
+            yield PageItem(
+                no=page,
+                books=books_in_page,
+                of_category_id=self.category,
+                of_category_name=category_name,
+            )
             page += 1
             yield response.follow(
                 self.URL_LIST_PAGE.format(category=self.category, page=page),
