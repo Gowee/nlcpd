@@ -48,6 +48,22 @@ class CategoryItem:
     parental_category_name: str
 
 
+@mongo_item(collection_name="pages", upsert_index=("no", "of_category_id"))
+@dataclass
+class PageItem:
+    @dataclass
+    class BasicBookItem:
+        id: str
+        name: str
+        of_collection_name: str
+
+    no: int
+    books: list[BasicBookItem]  # of_collection_name
+    brief: str
+    of_category_id: int
+    of_category_name: str
+
+
 @mongo_item(collection_name="books", upsert_index=("id", "of_collection_name"))
 @dataclass
 class BookItem:

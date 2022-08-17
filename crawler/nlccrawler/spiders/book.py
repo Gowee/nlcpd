@@ -5,7 +5,7 @@ from urllib.parse import urljoin, urlparse, parse_qsl, urlencode
 from itertools import chain
 from copy import copy
 
-from ..items import BookItem, VolumeItem
+from ..items import BookItem, VolumeItem, PageItem
 
 
 class BookSpider(scrapy.Spider):
@@ -22,10 +22,13 @@ class BookSpider(scrapy.Spider):
     PRIO_BOOK_INFO = 20
     PRIO_VOLUME = 30
 
-    def __init__(self, category, starting_page=1, no_volume=False, *args, **kwargs):
+    def __init__(
+        self, category, starting_page=1, no_book=False, no_volume=False, *args, **kwargs
+    ):
         super().__init__(*args, **kwargs)
         self.category = category
         self.starting_page = starting_page
+        self.no_book = no_book
         self.no_volume = no_volume
 
     def start_requests(self):
@@ -40,10 +43,14 @@ class BookSpider(scrapy.Spider):
         # TODO: terminate on 404
         page = response.meta["page"]
 
+        category_name = response.css("input#categoryName").attrib["value"]
+        books_in_page = []
         idx = -1
         for idx, book in enumerate(
             response.css('ul > li a[href^="/allSearch/searchDetail"]:nth-of-type(1)')
         ):
+            title = book.xpath("..").css(".tt").xpath("text()").get()
+            brief = "\n".join(filter(None, map(lambda s: s.strip(), book.xpath("..").css(".txt *::text").getall())))
             url = book.attrib["href"]
             url_params = dict(parse_qsl(urlparse(url).query))
             url = urljoin(self.URL_LIST_PAGE, url)
@@ -53,21 +60,36 @@ class BookSpider(scrapy.Spider):
             except KeyError:
                 self.log(f"Unrecognized book url {url} on page {page}", logging.INFO)
                 continue
+            # TODO: filter out placeholder cover image
             cover_image_url = book.css("img::attr(src)").get()
-            # TODO filter out placeholder cover image
 
-            yield response.follow(
-                url,
-                meta={
-                    "collection_name": collection_name,
-                    "page": page,
-                    "book_id": book_id,
-                    "cover_image_url": cover_image_url,
-                },
-                priority=self.PRIO_BOOK_INFO,
-                callback=self.parse_book_info,
+            books_in_page.append(
+                {
+                    "id": book_id,
+                    "name": title,
+                    "brief": brief,
+                    "of_collection_name": collection_name,
+                }
             )
+            if not self.no_book:
+                yield response.follow(
+                    url,
+                    meta={
+                        "collection_name": collection_name,
+                        "page": page,
+                        "book_id": book_id,
+                        "cover_image_url": cover_image_url,
+                    },
+                    priority=self.PRIO_BOOK_INFO,
+                    callback=self.parse_book_info,
+                )
 
+        yield PageItem(
+            no=page,
+            books=books_in_page,
+            of_category_id=self.category,
+            of_category_name=category_name,
+        )
         self.log(f"Got {idx + 1} books on page {page}")
         if idx != -1:
             page += 1
