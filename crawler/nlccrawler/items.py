@@ -55,11 +55,11 @@ class PageItem:
     class BasicBookItem:
         id: str
         name: str
+        brief: str
         of_collection_name: str
 
     no: int
     books: list[BasicBookItem]  # of_collection_name
-    brief: str
     of_category_id: int
     of_category_name: str
 
