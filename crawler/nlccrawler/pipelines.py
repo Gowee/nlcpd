@@ -27,7 +27,7 @@ from pymongo import InsertOne, UpdateOne
 class TxMongoPipeline(object):
     mongo_uri = "mongodb://localhost:27017"  # default
 
-    def __init__(self, mongo_uri, db_name, buffer_size=1):
+    def __init__(self, mongo_uri, db_name, buffer_size=0):
         self.logger = logging.getLogger(self.__class__.__name__)
 
         self.mongo_uri = mongo_uri or self.mongo_uri
