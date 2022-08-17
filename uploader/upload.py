@@ -18,6 +18,7 @@ from getbook import getbook
 CONFIG_FILE_PATH = "./config.yml"
 POSITION_FILE_PATH = "./.position"
 DATA_DIR = os.path.join(os.getcwd(), "data")
+RETRY_TIMES = 3
 
 USER_AGENT = "nlcpdbot/0.0 (+https://github.com/gowee/nlcpd)"
 
@@ -45,19 +46,21 @@ def store_position(position):
         f.write(position)
 
 
-def retry(times=3):
+def retry(times=RETRY_TIMES):
     def wrapper(fn):
         tried = 0
 
         @functools.wraps(fn)
         def wrapped(*args, **kwargs):
-            try:
-                return fn(*args, **kwargs)
-            except Exception as e:
-                nonlocal tried
-                tried += 1
-                if tried == times:
-                    raise Exception(f"Failed finally after {times} tries") from e
+            while True:
+                try:
+                    return fn(*args, **kwargs)
+                except Exception as e:
+                    nonlocal tried
+                    tried += 1
+                    if tried == times:
+                        raise Exception(f"Failed finally after {times} tries") from e
+                    logger.debug(f"Retrying {fn}")
 
         return wrapped
 
@@ -178,7 +181,7 @@ def main():
             if not page.exists:
                 logger.info(f"Uploading {pagename}")
 
-                @retry(3)
+                @retry()
                 def do1():
                     return site.upload(
                         getbook_unified(volume),
@@ -193,7 +196,7 @@ def main():
             else:
                 logger.info(f"{pagename} exists, updating wikitext")
 
-                @retry(3)
+                @retry()
                 def do2():
                     page.edit(volume_wikitext, comment + " (Updating metadata)")
 
