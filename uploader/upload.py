@@ -70,8 +70,9 @@ def retry(times=RETRY_TIMES):
 def gen_toc(toc):
     lines = []
     for no, entry in toc:
-        assert not no
-        lines.append(entry)
+        # assert not no
+        # no is often emtpy, but there are also rare cases such as 外科精要(data_011,411999024120)
+        lines.append(" ".join(filter(None, [no, entry])))
     contents = " <br/>\n".join(lines)
     if contents:
         contents = "<p>\n" + contents + "\n</p>"
