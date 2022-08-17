@@ -124,7 +124,8 @@ def main():
         if config.get('apply_tortoise_shell_brackets_to_starting_of_byline', False):
             authors = [re.sub(r"^[（(〔](.{0,3}?)[）)〕]", r"〔\1〕", author) for author in authors]
         byline = "\n".join(authors)
-        title = book["name"].replace("@@@", " ")
+        book["name"] = book["name"].replace("@@@", " ")
+        title = book["name"]
         volumes = book["volumes"]
         volumes.sort(key=lambda e: e["index_in_book"])
         metadata = book["misc_metadata"]
