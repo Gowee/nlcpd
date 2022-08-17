@@ -84,6 +84,7 @@ def getbook_unified(volume):
 
 
 def fix_bookname_in_pagename(bookname):
+    bookname = bookname.replace("@@@", " ")
     if bookname.startswith("[") and bookname.endswith("]"):  # [四家四六]
         bookname = bookname[1:-1]
     if bookname.startswith("["):
@@ -124,8 +125,9 @@ def main():
         if config.get('apply_tortoise_shell_brackets_to_starting_of_byline', False):
             authors = [re.sub(r"^[（(〔](.{0,3}?)[）)〕]", r"〔\1〕", author) for author in authors]
         byline = "\n".join(authors)
-        book["name"] = book["name"].replace("@@@", " ")
         title = book["name"]
+        if "@@@" in title:
+            title = "[" + title.replace("@@@", " ") + "]" # http://www.nlc.cn/pcab/gjbhzs/bm/201412/P020150309516939790893.pdf §8.1.4, §8.1.6
         volumes = book["volumes"]
         volumes.sort(key=lambda e: e["index_in_book"])
         metadata = book["misc_metadata"]
