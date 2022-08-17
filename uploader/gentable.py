@@ -32,6 +32,8 @@ def main():
     ]
 
     for book in batch:
+        book["name"] = book["name"].replace("@@@", " ")
+        book["author"] = book["author"].replace("@@@", " ")
         dbid = book["of_collection_name"].removeprefix("data_")
         lines.append(
             f'* 《{book["name"]}》 {book["author"]} {{{{NLC-Book-Link|{dbid}|{book["id"]}|catid={book["of_category_id"]}}}}}'
