@@ -34,7 +34,7 @@ class BookSpider(scrapy.Spider):
     def start_requests(self):
         yield scrapy.Request(
             self.URL_LIST_PAGE.format(category=self.category, page=self.starting_page),
-            meta={"page": 1},
+            meta={"page": self.starting_page},
             dont_filter=True,
             callback=self.parse_list_page,
         )
