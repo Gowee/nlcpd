@@ -139,7 +139,7 @@ def main():
 {{zh|%s}}
 
 [[Category:Chinese-language books by title]]
-"""
+""" % title
             category_page.edit(
                 category_wikitext,
                 f"Creating (batch task; nlc:{book['of_collection_name']},{book['id']})",
