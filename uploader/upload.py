@@ -187,9 +187,9 @@ def main():
                         comment=comment,
                     )
                 r = do1()
-                if r.get("result", {}) != "Success":
+                if (r or {}).get("result", {}) != "Success":
                     logger.warning("Upload failed:")
-                    logger.warning(r)
+                    logger.warning(r or "Unknown")
             else:
                 logger.info(f"{pagename} exists, updating wikitext")
 
