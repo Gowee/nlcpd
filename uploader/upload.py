@@ -183,16 +183,14 @@ def main():
 
                 @retry()
                 def do1():
-                    return site.upload(
+                    r = site.upload(
                         getbook_unified(volume),
                         filename=filename,
                         description=volume_wikitext,
                         comment=comment,
                     )
-                r = do1()
-                if (r or {}).get("result", {}) != "Success":
-                    logger.warning("Upload failed:")
-                    logger.warning(r or "Unknown")
+                    assert (r or {}).get("result", {}) == "Success", "Upload failed"
+                do1()
             else:
                 logger.info(f"{pagename} exists, updating wikitext")
 
