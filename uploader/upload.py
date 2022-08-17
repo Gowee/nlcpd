@@ -186,8 +186,10 @@ def main():
                         description=volume_wikitext,
                         comment=comment,
                     )
-
-                do1()
+                r = do1()
+                if r.get("upload", {}).get("result", {}) != "Success":
+                    logger.warning("Upload failed:")
+                    logger.warning(r)
             else:
                 logger.info(f"{pagename} exists, updating wikitext")
 
