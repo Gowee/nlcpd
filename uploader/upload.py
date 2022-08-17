@@ -120,8 +120,11 @@ def main():
         # TODO: peek and report?
 
     for book in batch:
-        byline = re.sub(r"\（(.+?)\）", r"〔\1〕", book["author"])
-        title = book["name"]
+        authors = book["author"].split("@@@")
+        if config.get('apply_tortoise_shell_brackets_to_starting_of_byline', False):
+            authors = [re.sub(r"^[（(〔](.{0,3}?)[）)〕]", r"〔\1〕", author) for author in authors]
+        byline = "\n".join(authors)
+        title = book["name"].replace("@@@", " ")
         volumes = book["volumes"]
         volumes.sort(key=lambda e: e["index_in_book"])
         metadata = book["misc_metadata"]
