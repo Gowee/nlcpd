@@ -83,8 +83,9 @@ def gen_toc(toc):
 def getbook_unified(volume, proxies=None):
     # if "fileiplogger.info("Failed to get file by path: " + str(e), ", fallbacking to getbook")
     return BytesIO(
-        getbook(volume["of_collection_name"].removeprefix("data_"), volume["id"]),
-        proxies,
+        getbook(
+            volume["of_collection_name"].removeprefix("data_"), volume["id"], proxies
+        ),
     )
 
 
