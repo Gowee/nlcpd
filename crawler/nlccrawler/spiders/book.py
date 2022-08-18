@@ -23,18 +23,19 @@ class BookSpider(scrapy.Spider):
     PRIO_VOLUME = 30
 
     def __init__(
-        self, category, starting_page=1, no_book=False, no_volume=False, *args, **kwargs
+        self, category, start_page=1, end_page=0, no_book=False, no_volume=False, *args, **kwargs
     ):
         super().__init__(*args, **kwargs)
         self.category = category
-        self.starting_page = starting_page
+        self.start_page = int(start_page)
+        self.end_page = int(end_page)
         self.no_book = no_book
         self.no_volume = no_volume
 
     def start_requests(self):
         yield scrapy.Request(
-            self.URL_LIST_PAGE.format(category=self.category, page=self.starting_page),
-            meta={"page": self.starting_page},
+            self.URL_LIST_PAGE.format(category=self.category, page=self.start_page),
+            meta={"page": self.start_page},
             dont_filter=True,
             callback=self.parse_list_page,
         )
@@ -93,6 +94,8 @@ class BookSpider(scrapy.Spider):
                 )
 
         self.log(f"Got {idx + 1} books on page {page}")
+        if page == self.end_page:
+            return
         if idx != -1:
             # page contains > 0 books
             yield PageItem(
