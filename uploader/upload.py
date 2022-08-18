@@ -213,7 +213,7 @@ def main():
                             description=volume_wikitext,
                             comment=comment,
                         )
-                        assert (r or {}).get("result", {}) == "Success" and not (
+                        assert (r or {}).get("result", {}) == "Success" or (
                             r or {}
                         ).get("warnings", {}).get("exists"), f"Upload failed {r}"
 
