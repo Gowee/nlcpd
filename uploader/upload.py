@@ -160,7 +160,13 @@ def main():
             )
         for ivol, volume in enumerate(volumes):
             description = "\n".join(
-                filter(lambda v: v, [book["introduction"], gen_toc(volume["toc"])])
+                filter(
+                    lambda v: v,
+                    [
+                        book["introduction"].replace("###", "@@@").replace("@@@", "\n"),
+                        gen_toc(volume["toc"]),
+                    ],
+                )
             )
             volume_name = (volume["name"] or f"第{ivol+1}冊") if len(volumes) > 1 else ""
             volume_name_wps = (
