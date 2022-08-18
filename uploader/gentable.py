@@ -41,7 +41,7 @@ def main():
         volumes = book["volumes"]
         volumes.sort(key=lambda e: e["index_in_book"])
         for ivol, volume in enumerate(volumes):
-            volume_name = (volume["name"].replace("_", "-") or f"第{ivol+1}冊") if len(volumes) > 1 else ""
+            volume_name = (volume["name"].replace("_", "–") or f"第{ivol+1}冊") if len(volumes) > 1 else ""
             volume_name_wps = (
                 (" " + volume_name) if volume_name else ""
             )  # with preceding space
