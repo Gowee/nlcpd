@@ -24,7 +24,8 @@ def main():
     with open(os.path.join(DATA_DIR, config["batch"] + ".json")) as f:
         batch = json.load(f)
     template = config["template"]
-    batch_link = config["batch_link"] or config["batch"]
+    batch_link = config["batch_link"]
+    category_name = re.search(r"(Category:.+?)[]|]", batch_link).group(1)
 
     lines = [
         f'== {config["batch"]} ==',
@@ -52,6 +53,9 @@ def main():
             filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
             pagename = "File:" + filename
             lines.append(f"** [[:{pagename}]]")
+    lines.append("")
+    lines.append("[[" + category_name + "]]")
+    lines.append("")
 
     print("\n".join(lines))
 

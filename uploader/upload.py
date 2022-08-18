@@ -163,15 +163,8 @@ def main():
                 f"Creating (batch task; nlc:{book['of_collection_name']},{book['id']})",
             )
         for ivol, volume in enumerate(volumes):
-            description = "\n".join(
-                filter(
-                    lambda v: v,
-                    [
-                        book["introduction"].replace("###", "@@@").replace("@@@", "\n"),
-                        gen_toc(volume["toc"]),
-                    ],
-                )
-            )
+            abstract = book["introduction"].replace("###", "@@@").replace("@@@", "\n")
+            toc = gen_toc(volume["toc"])
             volume_name = (
                 (volume["name"].replace("_", "–").replace("-", "–") or f"第{ivol+1}冊")
                 if len(volumes) > 1
@@ -185,7 +178,8 @@ def main():
   |byline={byline}
   |title={title}
   |volume={volume_name}
-  |description={description}
+  |abstract={abstract}
+  |toc={toc}
   |catid={book['of_category_id']}
   |db={volume["of_collection_name"]}
   |dbid={dbid}
