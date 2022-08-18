@@ -173,7 +173,7 @@ def main():
                 )
             )
             volume_name = (
-                (volume["name"].replace("_", "–") or f"第{ivol+1}冊")
+                (volume["name"].replace("_", "–").replace("-", "–") or f"第{ivol+1}冊")
                 if len(volumes) > 1
                 else ""
             )
