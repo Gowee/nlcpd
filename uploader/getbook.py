@@ -17,9 +17,11 @@ REGEX_TIME_FLAG = re.compile(r"timeFlag=\"(\w+)\"")
 USER_AGENT = "nlcpdbot/0.0 (+https://github.com/gowee/nlcpd)"
 
 
-def getbook(aid: str, bid: str):
+def getbook(aid: str, bid: str, proxies=None):
     resp = requests.get(
-        URL_READER.format(aid=aid, bid=bid), headers={"User_Agent": USER_AGENT}
+        URL_READER.format(aid=aid, bid=bid),
+        headers={"User_Agent": USER_AGENT},
+        proxies=proxies,
     )
     resp.raise_for_status()
     html = resp.text
@@ -63,6 +65,7 @@ def getbook(aid: str, bid: str):
     resp = requests.post(
         URL_FILE.format(aid=aid, bid=bid, kime=time_key, fime=time_flag),
         headers={"User_Agent": USER_AGENT, "myreader": token_key},
+        proxies=proxies,
     )
     resp.raise_for_status()
     return resp.content

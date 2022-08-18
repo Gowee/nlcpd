@@ -80,10 +80,11 @@ def gen_toc(toc):
     return contents
 
 
-def getbook_unified(volume):
+def getbook_unified(volume, proxies=None):
     # if "fileiplogger.info("Failed to get file by path: " + str(e), ", fallbacking to getbook")
     return BytesIO(
-        getbook(volume["of_collection_name"].removeprefix("data_"), volume["id"])
+        getbook(volume["of_collection_name"].removeprefix("data_"), volume["id"]),
+        proxies,
     )
 
 
@@ -113,6 +114,8 @@ def main():
         batch = json.load(f)
     template = config["template"]
     batch_link = config["batch_link"] or config["batch"]
+
+    nlc_proxies = config.get("nlc_proxies", None)
 
     last_position = load_position()
 
@@ -204,7 +207,7 @@ def main():
                     @retry()
                     def do1():
                         r = site.upload(
-                            getbook_unified(volume),
+                            getbook_unified(volume, nlc_proxies),
                             filename=filename,
                             description=volume_wikitext,
                             comment=comment,
