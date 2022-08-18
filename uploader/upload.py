@@ -126,12 +126,16 @@ def main():
 
     for book in batch:
         authors = book["author"].split("@@@")
-        if config.get('apply_tortoise_shell_brackets_to_starting_of_byline', False):
-            authors = [re.sub(r"^[（(〔](.{0,3}?)[）)〕]", r"〔\1〕", author) for author in authors]
+        if config.get("apply_tortoise_shell_brackets_to_starting_of_byline", False):
+            authors = [
+                re.sub(r"^[（(〔](.{0,3}?)[）)〕]", r"〔\1〕", author) for author in authors
+            ]
         byline = "\n".join(authors)
         title = book["name"]
         if "@@@" in title:
-            title = "[" + title.replace("@@@", " ") + "]" # http://www.nlc.cn/pcab/gjbhzs/bm/201412/P020150309516939790893.pdf §8.1.4, §8.1.6
+            title = (
+                "[" + title.replace("@@@", " ") + "]"
+            )  # http://www.nlc.cn/pcab/gjbhzs/bm/201412/P020150309516939790893.pdf §8.1.4, §8.1.6
         volumes = book["volumes"]
         volumes.sort(key=lambda e: e["index_in_book"])
         metadata = book["misc_metadata"]
@@ -141,12 +145,15 @@ def main():
         category_page = site.pages[category_name]
         # TODO: for now we do not create a seperated category suffixed with the edition
         if not category_page.exists:
-            category_wikitext = """{{Wikidata Infobox}}
+            category_wikitext = (
+                """{{Wikidata Infobox}}
 {{Category for book|zh}}
 {{zh|%s}}
 
 [[Category:Chinese-language books by title]]
-""" % title
+"""
+                % title
+            )
             category_page.edit(
                 category_wikitext,
                 f"Creating (batch task; nlc:{book['of_collection_name']},{book['id']})",
@@ -172,6 +179,7 @@ def main():
   |volumeid={volume["id"]}
 {additional_fields}
 }}}}
+{"{{Watermark}}" if config.get("watermark_tag", False) else ""}
 
 [[{category_name}]]
 """
@@ -179,27 +187,39 @@ def main():
             filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
             pagename = "File:" + filename
             page = site.pages[pagename]
-            if not page.exists:
-                logger.info(f"Uploading {pagename}")
+            try:
+                if not page.exists:
+                    logger.info(f"Uploading {pagename}")
 
-                @retry()
-                def do1():
-                    r = site.upload(
-                        getbook_unified(volume),
-                        filename=filename,
-                        description=volume_wikitext,
-                        comment=comment,
-                    )
-                    assert (r or {}).get("result", {}) == "Success", "Upload failed"
-                do1()
-            else:
-                logger.info(f"{pagename} exists, updating wikitext")
+                    @retry()
+                    def do1():
+                        r = site.upload(
+                            getbook_unified(volume),
+                            filename=filename,
+                            description=volume_wikitext,
+                            comment=comment,
+                        )
+                        assert (r or {}).get(
+                            "result", {}
+                        ) == "Success", f"Upload failed {r}"
 
-                @retry()
-                def do2():
-                    page.edit(volume_wikitext, comment + " (Updating metadata)")
+                    do1()
+                else:
+                    logger.info(f"{pagename} exists, updating wikitext")
 
-                do2()
+                    @retry()
+                    def do2():
+                        r = page.edit(volume_wikitext, comment + " (Updating metadata)")
+                        assert (r or {}).get(
+                            "result", {}
+                        ) == "Success", f"Upload failed {r}"
+
+                    do2()
+            except Exception as e:
+                if config.get("skip_on_failure", False):
+                    logger.warning("Upload failed, skipping", exc_info=e)
+                else:
+                    raise e
         store_position(book["id"])
 
 
