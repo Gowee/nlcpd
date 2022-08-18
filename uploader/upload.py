@@ -168,7 +168,11 @@ def main():
                     ],
                 )
             )
-            volume_name = (volume["name"] or f"第{ivol+1}冊") if len(volumes) > 1 else ""
+            volume_name = (
+                (volume["name"].replace("_", "-") or f"第{ivol+1}冊")
+                if len(volumes) > 1
+                else ""
+            )
             volume_name_wps = (
                 (" " + volume_name) if volume_name else ""
             )  # with preceding space
