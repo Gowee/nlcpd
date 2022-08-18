@@ -213,9 +213,9 @@ def main():
                             description=volume_wikitext,
                             comment=comment,
                         )
-                        assert (r or {}).get(
-                            "result", {}
-                        ) == "Success", f"Upload failed {r}"
+                        assert (r or {}).get("result", {}) == "Success" and not (
+                            r or {}
+                        ).get("warnings", {}).get("exists"), f"Upload failed {r}"
 
                     do1()
                 else:
@@ -226,11 +226,11 @@ def main():
                         r = page.edit(volume_wikitext, comment + " (Updating metadata)")
                         assert (r or {}).get(
                             "result", {}
-                        ) == "Success", f"Upload failed {r}"
+                        ) == "Success", f"Update failed {r}"
 
                     do2()
             except Exception as e:
-                if config.get("skip_on_failure", False):
+                if config.get("skip_on_failures", False):
                     logger.warning("Upload failed, skipping", exc_info=e)
                 else:
                     raise e
