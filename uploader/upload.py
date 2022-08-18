@@ -95,6 +95,7 @@ def fix_bookname_in_pagename(bookname):
         bookname = bookname[1:-1]
     if bookname.startswith("["):
         bookname = re.sub(r"\[(.+?)\]", r"〔\1〕", bookname)  # [宋]...
+    bookname = bookname.replace(":", "：")  # e.g. 404 00J001624 綠洲:中英文藝綜合月刊
     return bookname
 
 

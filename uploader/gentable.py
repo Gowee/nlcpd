@@ -13,6 +13,7 @@ def fix_bookname_in_pagename(bookname):
         bookname = bookname[1:-1]
     if bookname.startswith("["):
         bookname = re.sub(r"\[(.+?)\]", r"〔\1〕", bookname)  # [宋]...
+    bookname = bookname.replace(":", "：")
     return bookname
 
 
