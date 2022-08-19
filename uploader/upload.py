@@ -8,6 +8,7 @@ from io import BytesIO
 import os
 import functools
 import re
+import sys
 
 import requests
 import yaml
@@ -15,9 +16,9 @@ import mwclient
 
 from getbook import getbook
 
-CONFIG_FILE_PATH = "./config.yml"
-POSITION_FILE_PATH = "./.position"
-DATA_DIR = os.path.join(os.getcwd(), "data")
+CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.yml")
+POSITION_FILE_PATH = os.path.join(os.path.dirname(__file__), ".position")
+DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 RETRY_TIMES = 3
 
 USER_AGENT = "nlcpdbot/0.0 (+https://github.com/gowee/nlcpd)"
@@ -33,16 +34,17 @@ def call(command, *args, **kwargs):
     return subprocess.check_call(command, *args, **kwargs)
 
 
-def load_position():
-    if os.path.exists(POSITION_FILE_PATH):
+def load_position(name):
+    print(POSITION_FILE_PATH + "." + name)
+    if os.path.exists(POSITION_FILE_PATH + "." + name):
         with open(POSITION_FILE_PATH, "r") as f:
             return f.read().strip()
     else:
         return None
 
 
-def store_position(position):
-    with open(POSITION_FILE_PATH, "w") as f:
+def store_position(name, position):
+    with open(POSITION_FILE_PATH + "." + name, "w") as f:
         f.write(position)
 
 
@@ -100,36 +102,41 @@ def fix_bookname_in_pagename(bookname):
 
 
 def main():
-    import sys, os
-
-    sys.path.append(DATA_DIR)
-
     with open(CONFIG_FILE_PATH, "r") as f:
         config = yaml.safe_load(f.read())
+
+    if len(sys.argv) < 2:
+        exit(
+            f"Not batch specified.\n\nAvailable: {', '.join(list(config['batchs'].keys()))}"
+        )
+    batch_name = sys.argv[1]
+
     username, password = config["username"], config["password"]
     site = mwclient.Site("commons.wikimedia.org")
     site.login(username, password)
     site.requests["timeout"] = 125
     site.chunk_size = 1024 * 1024 * 64
 
-    with open(os.path.join(DATA_DIR, config["batch"] + ".json")) as f:
-        batch = json.load(f)
-    template = config["template"]
-    batch_link = config["batch_link"] or config["batch"]
-
     nlc_proxies = config.get("nlc_proxies", None)
 
-    last_position = load_position()
+    config = config["batchs"][batch_name]
+
+    with open(os.path.join(DATA_DIR, batch_name + ".json")) as f:
+        books = json.load(f)
+    template = config["template"]
+    batch_link = config["link"] or config["name"]
+
+    last_position = load_position(batch_name)
 
     if last_position is not None:
-        batch = iter(batch)
+        books = iter(books)
         print(f"Last processed: {last_position}")
         next(
-            itertools.dropwhile(lambda book: str(book["id"]) != last_position, batch)
+            itertools.dropwhile(lambda book: str(book["id"]) != last_position, books)
         )  # lazy!
         # TODO: peek and report?
 
-    for book in batch:
+    for book in books:
         authors = book["author"].split("@@@")
         if config.get("apply_tortoise_shell_brackets_to_starting_of_byline", False):
             authors = [
@@ -200,7 +207,7 @@ def main():
                 if not page.exists:
                     logger.info(f'Downloading {dbid},{book["id"]},{volume["id"]}')
                     binary = getbook_unified(volume, nlc_proxies)
-                    logger.info(f"Uploading {pagename} ({len(binary)})")
+                    logger.info(f"Uploading {pagename} ({len(binary)} B)")
 
                     @retry()
                     def do1():
@@ -231,7 +238,7 @@ def main():
                     logger.warning("Upload failed, skipping", exc_info=e)
                 else:
                     raise e
-        store_position(book["id"])
+        store_position(batch_name, book["id"])
 
 
 if __name__ == "__main__":
