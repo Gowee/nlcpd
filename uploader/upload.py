@@ -37,7 +37,7 @@ def call(command, *args, **kwargs):
 def load_position(name):
     print(POSITION_FILE_PATH + "." + name)
     if os.path.exists(POSITION_FILE_PATH + "." + name):
-        with open(POSITION_FILE_PATH, "r") as f:
+        with open(POSITION_FILE_PATH + "." + name, "r") as f:
             return f.read().strip()
     else:
         return None
