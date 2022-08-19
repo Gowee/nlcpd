@@ -2,6 +2,7 @@
 import sys
 import json
 
+
 def main():
     try:
         path = sys.argv[1]
@@ -23,6 +24,7 @@ def main():
     buffer = []
     cnt = 0
     n = 1
+
     def dump_buffer():
         nonlocal n, cnt
         print(f"{n}: {len(buffer)} {cnt}")
@@ -31,15 +33,15 @@ def main():
         buffer.clear()
         cnt = 0
         n += 1
+
     for b in d:
-        if cnt + len(b['volumes']) > limit:
+        if cnt + len(b["volumes"]) > limit:
             # print("Overflowing: ", len(b['volumes']))
             dump_buffer()
-        cnt += len(b['volumes'])
+        cnt += len(b["volumes"])
         buffer.append(b)
     if buffer:
         dump_buffer()
-
 
 
 if __name__ == "__main__":

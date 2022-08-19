@@ -80,12 +80,12 @@ def gen_toc(toc):
     return contents
 
 
+@retry()
 def getbook_unified(volume, proxies=None):
+    logger.debug(f"Fetching {volume}")
     # if "fileiplogger.info("Failed to get file by path: " + str(e), ", fallbacking to getbook")
-    return BytesIO(
-        getbook(
-            volume["of_collection_name"].removeprefix("data_"), volume["id"], proxies
-        ),
+    return getbook(
+        volume["of_collection_name"].removeprefix("data_"), volume["id"], proxies
     )
 
 
@@ -198,12 +198,14 @@ def main():
             page = site.pages[pagename]
             try:
                 if not page.exists:
+                    logger.info(f'Downloading {dbid},{book["id"]},{volume["id"]}')
+                    content = getbook_unified(volume, nlc_proxies)
                     logger.info(f"Uploading {pagename}")
 
                     @retry()
                     def do1():
                         r = site.upload(
-                            getbook_unified(volume, nlc_proxies),
+                            BytesIO(content),
                             filename=filename,
                             description=volume_wikitext,
                             comment=comment,
