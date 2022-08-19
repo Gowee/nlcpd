@@ -199,13 +199,13 @@ def main():
             try:
                 if not page.exists:
                     logger.info(f'Downloading {dbid},{book["id"]},{volume["id"]}')
-                    content = getbook_unified(volume, nlc_proxies)
-                    logger.info(f"Uploading {pagename}")
+                    binary = getbook_unified(volume, nlc_proxies)
+                    logger.info(f"Uploading {pagename} ({len(binary)})")
 
                     @retry()
                     def do1():
                         r = site.upload(
-                            BytesIO(content),
+                            BytesIO(binary),
                             filename=filename,
                             description=volume_wikitext,
                             comment=comment,
