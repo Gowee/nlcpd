@@ -35,7 +35,7 @@ def call(command, *args, **kwargs):
 
 
 def load_position(name):
-    print(POSITION_FILE_PATH + "." + name)
+    logger.info(f'Loading position from {POSITION_FILE_PATH + "." + name}')
     if os.path.exists(POSITION_FILE_PATH + "." + name):
         with open(POSITION_FILE_PATH + "." + name, "r") as f:
             return f.read().strip()
@@ -130,7 +130,7 @@ def main():
 
     if last_position is not None:
         books = iter(books)
-        print(f"Last processed: {last_position}")
+        logger.info(f"Last processed: {last_position}")
         next(
             itertools.dropwhile(lambda book: str(book["id"]) != last_position, books)
         )  # lazy!

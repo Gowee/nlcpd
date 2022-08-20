@@ -70,9 +70,9 @@ def getbook(aid: str, bid: str, proxies=None):
     resp.raise_for_status()
     if "Content-Length" in resp.headers:
         # https://blog.petrzemek.net/2018/04/22/on-incomplete-http-reads-and-the-requests-library-in-python/
-        expected_size = resp.headers["Content-Length"]
+        expected_size = int(resp.headers["Content-Length"])
         actual_size = resp.raw.tell()
-        assert int(
+        assert (
             expected_size == actual_size
         ), f"Incomplete download: {actual_size}/{expected_size}"
     return resp.content
