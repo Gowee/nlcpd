@@ -68,6 +68,7 @@ def getbook(aid: str, bid: str, proxies=None):
         proxies=proxies,
     )
     resp.raise_for_status()
+    assert len(resp.content) != 0, "Got empty file"
     if "Content-Length" in resp.headers:
         # https://blog.petrzemek.net/2018/04/22/on-incomplete-http-reads-and-the-requests-library-in-python/
         expected_size = int(resp.headers["Content-Length"])
