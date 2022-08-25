@@ -119,8 +119,8 @@ def main():
     site.chunk_size = 1024 * 1024 * 64
 
     overwriting_categories = {
-        (str(dbid), str(bookid)): catname
-        for (dbid, bookid, catname) in chain(
+        (str(item["dbid"]), str(item["bookid"])): item["catname"]
+        for item in chain(
             config.get("overwriting_categories", []),
             config["batchs"][batch_name].get("overwriting_categories", []),
         )
