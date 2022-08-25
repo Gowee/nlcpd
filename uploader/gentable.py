@@ -7,8 +7,8 @@ import sys
 
 import mwclient
 
-CONFIG_FILE_PATH = "./config.yml"
-DATA_DIR = os.path.join(os.getcwd(), "data")
+CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.yml")
+DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
 
 def fix_bookname_in_pagename(bookname):
@@ -32,9 +32,7 @@ def main():
     batch_name = sys.argv[1]
 
     def getopt(item, default=None):  # get batch config or fallback to global config
-        return config["batchs"][batch_name].get(
-            item, config.get(item, default)
-        )
+        return config["batchs"][batch_name].get(item, config.get(item, default))
 
     with open(os.path.join(DATA_DIR, batch_name + ".json")) as f:
         batch = json.load(f)

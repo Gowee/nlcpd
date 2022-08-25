@@ -127,9 +127,7 @@ def main():
     }
 
     def getopt(item, default=None):  # get batch config or fallback to global config
-        return config["batchs"][batch_name].get(
-            item, config.get(item, default)
-        )
+        return config["batchs"][batch_name].get(item, config.get(item, default))
 
     nlc_proxies = getopt("nlc_proxies", None)
 
