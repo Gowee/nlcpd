@@ -41,7 +41,7 @@ def main():
     category_name = re.search(r"(Category:.+?)[]|]", batch_link).group(1)
 
     lines = [
-        f'== {getopt("name")} ==',
+        f'== {batch_name} ==',
         f"Category: {batch_link}, Template: [[{template}|{template}]], Books: {len(batch)}, Files: {sum(map(lambda e: len(e['volumes']), batch))}\n",
     ]
 
