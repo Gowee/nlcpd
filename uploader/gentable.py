@@ -3,6 +3,9 @@ import yaml
 import os
 import re
 import json
+import sys
+
+import mwclient
 
 CONFIG_FILE_PATH = "./config.yml"
 DATA_DIR = os.path.join(os.getcwd(), "data")
@@ -22,14 +25,25 @@ def main():
     with open(CONFIG_FILE_PATH, "r") as f:
         config = yaml.safe_load(f.read())
 
-    with open(os.path.join(DATA_DIR, config["batch"] + ".json")) as f:
+    if len(sys.argv) < 2:
+        exit(
+            f"Not batch specified.\n\nAvailable: {', '.join(list(config['batchs'].keys()))}"
+        )
+    batch_name = sys.argv[1]
+
+    def getopt(item, default=None):  # get batch config or fallback to global config
+        return config["batchs"][batch_name].get(
+            item, config.get(item, default)
+        )
+
+    with open(os.path.join(DATA_DIR, batch_name + ".json")) as f:
         batch = json.load(f)
-    template = config["template"]
-    batch_link = config["batch_link"]
+    template = getopt("template")
+    batch_link = getopt("link") or getopt("name")
     category_name = re.search(r"(Category:.+?)[]|]", batch_link).group(1)
 
     lines = [
-        f'== {config["batch"]} ==',
+        f'== {getopt("name")} ==',
         f"Category: {batch_link}, Template: [[{template}|{template}]], Books: {len(batch)}, Files: {sum(map(lambda e: len(e['volumes']), batch))}\n",
     ]
 
@@ -45,7 +59,10 @@ def main():
         for ivol, volume in enumerate(volumes):
             volume_name = (
                 (volume["name"].replace("_", "–").replace("-", "–") or f"第{ivol+1}冊")
-                if len(volumes) > 1
+                if (
+                    len(volumes) > 1
+                    or getopt("always_include_volume_name_in_filename", False)
+                )
                 else ""
             )
             volume_name_wps = (
@@ -58,7 +75,21 @@ def main():
     lines.append("[[" + category_name + "]]")
     lines.append("")
 
-    print("\n".join(lines))
+    if len(sys.argv) < 3:
+        print("\n".join(lines))
+    else:
+        print(f"Writing file list for batch {batch_name}")
+        pagename = sys.argv[2]
+
+        username, password = config["username"], config["password"]
+        site = mwclient.Site("commons.wikimedia.org")
+        site.login(username, password)
+        site.requests["timeout"] = 125
+        site.chunk_size = 1024 * 1024 * 64
+
+        site.pages[pagename].edit(
+            "\n".join(lines), f"Writing file list for batch {batch_name} to {pagename}"
+        )
 
 
 if __name__ == "__main__":

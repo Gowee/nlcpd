@@ -9,6 +9,7 @@ import os
 import functools
 import re
 import sys
+from itertools import chain
 
 import requests
 import yaml
@@ -117,14 +118,25 @@ def main():
     site.requests["timeout"] = 125
     site.chunk_size = 1024 * 1024 * 64
 
-    nlc_proxies = config.get("nlc_proxies", None)
+    overwriting_categories = {
+        (str(dbid), str(bookid)): catname
+        for (dbid, bookid, catname) in chain(
+            config.get("overwriting_categories", []),
+            config["batchs"][batch_name].get("overwriting_categories", []),
+        )
+    }
 
-    config = config["batchs"][batch_name]
+    def getopt(item, default=None):  # get batch config or fallback to global config
+        return config["batchs"][batch_name].get(
+            item, config.get(item, default)
+        )
+
+    nlc_proxies = getopt("nlc_proxies", None)
 
     with open(os.path.join(DATA_DIR, batch_name + ".json")) as f:
         books = json.load(f)
-    template = config["template"]
-    batch_link = config["link"] or config["name"]
+    template = getopt("template")
+    batch_link = getopt("link") or getopt("name")
 
     last_position = load_position(batch_name)
 
@@ -138,7 +150,7 @@ def main():
 
     for book in books:
         authors = book["author"].split("@@@")
-        if config.get("apply_tortoise_shell_brackets_to_starting_of_byline", False):
+        if getopt("apply_tortoise_shell_brackets_to_starting_of_byline", False):
             authors = [
                 re.sub(r"^[（(〔](.{0,3}?)[）)〕]", r"〔\1〕", author) for author in authors
             ]
@@ -153,7 +165,10 @@ def main():
         metadata = book["misc_metadata"]
         dbid = book["of_collection_name"].removeprefix("data_")
         additional_fields = "\n".join(f"  |{k}={v}" for k, v in metadata.items())
-        category_name = "Category:" + fix_bookname_in_pagename(title)
+        if (k := (str(dbid), str(book["id"]))) in overwriting_categories:
+            category_name = "Category:" + overwriting_categories[k]
+        else:
+            category_name = "Category:" + fix_bookname_in_pagename(title)
         category_page = site.pages[category_name]
         # TODO: for now we do not create a seperated category suffixed with the edition
         if not category_page.exists:
@@ -175,7 +190,10 @@ def main():
             toc = gen_toc(volume["toc"])
             volume_name = (
                 (volume["name"].replace("_", "–").replace("-", "–") or f"第{ivol+1}冊")
-                if len(volumes) > 1
+                if (
+                    len(volumes) > 1
+                    or getopt("always_include_volume_name_in_filename", False)
+                )
                 else ""
             )
             volume_name_wps = (
@@ -195,7 +213,7 @@ def main():
   |volumeid={volume["id"]}
 {additional_fields}
 }}}}
-{"{{Watermark}}" if config.get("watermark_tag", False) else ""}
+{"{{Watermark}}" if getopt("watermark_tag", False) else ""}
 
 [[{category_name}]]
 """
@@ -234,7 +252,7 @@ def main():
 
                     do2()
             except Exception as e:
-                if config.get("skip_on_failures", False):
+                if getopt("skip_on_failures", False):
                     logger.warning("Upload failed, skipping", exc_info=e)
                 else:
                     raise e
