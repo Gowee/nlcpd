@@ -41,18 +41,29 @@ def main():
             volume_name_wps = (
                 (" " + volume_name) if volume_name else ""
             )  # with preceding space
-            old_filename = f'NLC{book["of_collection_name"].removeprefix("data_")}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}.pdf'
+            # old_filename = f'NLC{book["of_collection_name"].removeprefix("data_")}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}.pdf'
             filename = f'NLC{book["of_collection_name"].removeprefix("data_")}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
-            print(f"Requesting to move {old_filename} to {filename}")
-            req = f"{{{{Rename|File:{filename}|1|Per uploader's request. Correct incomplete name. Thanks.}}}}\n"
-            # text = site.pages["File:" + old_filename].text()
+            # print(f"Requesting to move {old_filename} to {filename}")
+            # req = f"{{{{Rename|File:{filename}|1|Per uploader's request. Correct incomplete name. Thanks.}}}}\n"
+            # # text = site.pages["File:" + old_filename].text()
             # text = re.sub(r"\{\{Move.+\}\}", "", text)
             # text = (
             #     req
             #     + text
             # )
-            # site.pages["File:" + old_filename].edit(text)
-            site.pages["File:" + old_filename].prepend(req)
+            pagename = "File:" + filename
+            print("Updating metadata of ", pagename)
+            page = site.pages[pagename]
+            if not page.exists:
+                input("Invalid File:" + filename + ", press any key to skip")
+                continue
+            text = page.text()
+            text = re.sub(
+                r"\|volume=\s*$", f"|volume={volume_name}", text, flags=re.MULTILINE
+            )
+            text = re.sub(r"^==$", "=={{int:filedesc}}==", text, flags=re.MULTILINE)
+            site.pages[pagename].edit(text, "Add missing volume name")
+            # site.pages["File:" + old_filename].prepend(req)
 
 
 if __name__ == "__main__":
