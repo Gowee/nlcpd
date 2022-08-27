@@ -188,7 +188,11 @@ def main():
             toc = gen_toc(volume["toc"])
             volume_name = (
                 (
-                    volume["name"].replace("_", "–").replace("-", "–").replace("/", "–")
+                    volume["name"]
+                    .replace("_", "–")
+                    .replace("-", "–")
+                    .replace("/", "–")
+                    .replace("\n", " ")
                     or f"第{ivol+1}冊"
                 )
                 if (

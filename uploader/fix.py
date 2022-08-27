@@ -35,25 +35,20 @@ def main():
         with open(os.path.join(DATA_DIR, f"民國期刊.{n}.json"), "r") as f:
             books.extend(json.load(f))
     for book in books:
-        # if len(book["volumes"]) == 1:
-        for volume in book["volumes"]:
-            volume_name = volume["name"].replace("_", "–").replace("-", "–")
+        if len(book["volumes"]) == 1:
+            volume = book["volumes"][0]
+            volume_name = (
+                volume["name"]
+                .replace("_", "–")
+                .replace("-", "–")
+                .replace("/", "–")
+                .replace("\n", " ")
+            )
             volume_name_wps = (
                 (" " + volume_name) if volume_name else ""
             )  # with preceding space
             # old_filename = f'NLC{book["of_collection_name"].removeprefix("data_")}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}.pdf'
             filename = f'NLC{book["of_collection_name"].removeprefix("data_")}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
-            if "/" not in filename:
-                continue
-            new_filename = filename.replace("/", "–")
-            print(new_filename)
-            page = site.pages["File:" + filename.replace("/", "-")]
-            assert page.exists
-            text = page.text()
-            text = re.sub(r"\{\{Rename|.+?\}\}\n", "", text)
-            req = f"{{{{Rename|File:{new_filename}|1|Replace hyphen to en dash to keep file naming consistent in the batch upload task. Thanks.}}}}\n"
-            text = req + text
-            page.edit(text, "Rename request: replace hypen with en dash.")
             # print(f"Requesting to move {old_filename} to {filename}")
             # req = f"{{{{Rename|File:{filename}|1|Per uploader's request. Correct incomplete name. Thanks.}}}}\n"
             # # text = site.pages["File:" + old_filename].text()
@@ -63,19 +58,18 @@ def main():
             #     + text
             # )
 
-            # pagename = "File:" + filename
-            # print("Updating metadata of ", pagename)
-            # page = site.pages[pagename]
-            # if not page.exists:
-            #     input("Invalid File:" + filename + ", press any key to skip")
-            #     continue
-            # text = page.text()
-            # text = re.sub(r"\{\{Rename|.+?\}\}", "", text )
-            # text = re.sub(
-            #     r"\|volume=\s*$", f"|volume={volume_name}", text, flags=re.MULTILINE
-            # )
-            # text = re.sub(r"^==$", "=={{int:filedesc}}==", text, flags=re.MULTILINE)
-            # site.pages[pagename].edit(text, "Rename request: hyphen to en dash")
+            pagename = "File:" + filename
+            print("Updating metadata of ", pagename)
+            page = site.pages[pagename]
+            if not page.exists:
+                input("Invalid File:" + filename + ", press any key to skip")
+                continue
+            text = page.text()
+            text = re.sub(
+                r"\|volume=\s*$", f"|volume={volume_name}", text, flags=re.MULTILINE
+            )
+            text = re.sub(r"^==$", "=={{int:filedesc}}==", text, flags=re.MULTILINE)
+            site.pages[pagename].edit(text, "Add missing volume name")
 
             # site.pages["File:" + old_filename].prepend(req)
 
