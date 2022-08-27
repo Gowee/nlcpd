@@ -56,7 +56,7 @@ def main():
         volumes.sort(key=lambda e: e["index_in_book"])
         for ivol, volume in enumerate(volumes):
             volume_name = (
-                (volume["name"].replace("_", "–").replace("-", "–") or f"第{ivol+1}冊")
+                (volume["name"].replace("_", "–").replace("-", "–").replace("/", "–") or f"第{ivol+1}冊")
                 if (
                     len(volumes) > 1
                     or getopt("always_include_volume_name_in_filename", False)

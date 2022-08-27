@@ -187,7 +187,10 @@ def main():
             abstract = book["introduction"].replace("###", "@@@").replace("@@@", "\n")
             toc = gen_toc(volume["toc"])
             volume_name = (
-                (volume["name"].replace("_", "–").replace("-", "–") or f"第{ivol+1}冊")
+                (
+                    volume["name"].replace("_", "–").replace("-", "–").replace("/", "–")
+                    or f"第{ivol+1}冊"
+                )
                 if (
                     len(volumes) > 1
                     or getopt("always_include_volume_name_in_filename", False)
@@ -217,6 +220,7 @@ def main():
 """
             comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {byline} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[Category:{title}|{fix_bookname_in_pagename(title)}]])"
             filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
+            assert all(char not in set(r'["$*|\]</^>') for char in filename)
             pagename = "File:" + filename
             page = site.pages[pagename]
             try:
