@@ -247,16 +247,21 @@ def main():
 
                     do1()
                 else:
-                    logger.info(f"{pagename} exists, updating wikitext")
+                    if getopt("skip_on_existing", False):
+                        logger.debug(f"{pagename} exists, skipping")
+                    else:
+                        logger.info(f"{pagename} exists, updating wikitext")
 
-                    @retry()
-                    def do2():
-                        r = page.edit(volume_wikitext, comment + " (Updating metadata)")
-                        assert (r or {}).get(
-                            "result", {}
-                        ) == "Success", f"Update failed {r}"
+                        @retry()
+                        def do2():
+                            r = page.edit(
+                                volume_wikitext, comment + " (Updating metadata)"
+                            )
+                            assert (r or {}).get(
+                                "result", {}
+                            ) == "Success", f"Update failed {r}"
 
-                    do2()
+                        do2()
             except Exception as e:
                 if getopt("skip_on_failures", False):
                     logger.warning("Upload failed, skipping", exc_info=e)
