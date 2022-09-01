@@ -19,7 +19,9 @@ def main():
         sort_books_by_id = False
     if sort_books_by_id:
         print("sorting book")
-        d.sort(key=lambda b: b["id"])
+        l = max(len(str(b["id"])) for b in d)
+        print("  padding book id to ", l, "digits")
+        d.sort(key=lambda b: str(b["id"]).rjust(l, "0"))
 
     buffer = []
     cnt = 0

@@ -129801,5 +129801,92 @@
     "of_category_id": "10024",
     "of_category_name": "数字古籍",
     "of_collection_name": "data_892"
+  },
+  {
+    "_id": {
+      "$oid": "630290fd945893b261c6487d"
+    },
+    "id": "4119990134957",
+    "name": "静居集",
+    "author": "(明)张羽撰",
+    "cover_image_url": "http://202.106.125.217/img1/img892/SBGJ16871_00001.jpg",
+    "introduction": "",
+    "keywords": [],
+    "misc_metadata": {
+      "责任者": "(明)张羽撰",
+      "出版发行项": "张习明弘治四年[1491]",
+      "善本书号": "07197",
+      "版本项": "刻本",
+      "版本书目史注": "十一行二十一字黑口四周双边单鱼尾",
+      "现有藏本附注": "国家图书馆",
+      "丛编项": ""
+    },
+    "volumes": [
+      {
+        "_id": {
+          "$oid": "63029111945893b261c65423"
+        },
+        "id": "85222",
+        "name": "第1册",
+        "file_path": "data10/sbgj_shanbenguji/sbgj20180911_01/duixiang/PDF1/SBGJ16871/00001/SBGJ16871_00001.pdf",
+        "toc": [
+          [
+            "卷首",
+            ""
+          ],
+          [
+            "目錄",
+            ""
+          ],
+          [
+            "卷之一",
+            ""
+          ],
+          [
+            "卷之二",
+            ""
+          ]
+        ],
+        "index_in_book": 0,
+        "of_book_id": "4119990134957",
+        "of_collection_name": "data_892"
+      },
+      {
+        "_id": {
+          "$oid": "63029110945893b261c65373"
+        },
+        "id": "85256",
+        "name": "第2册",
+        "file_path": "data10/sbgj_shanbenguji/sbgj20180911_01/duixiang/PDF1/SBGJ16871/00002/SBGJ16871_00002.pdf",
+        "toc": [
+          [
+            "卷之三",
+            ""
+          ],
+          [
+            "卷之四",
+            ""
+          ],
+          [
+            "卷之五",
+            ""
+          ],
+          [
+            "卷之六",
+            ""
+          ],
+          [
+            "附錄",
+            ""
+          ]
+        ],
+        "index_in_book": 1,
+        "of_book_id": "4119990134957",
+        "of_collection_name": "data_892"
+      }
+    ],
+    "of_category_id": "10024",
+    "of_category_name": "数字古籍",
+    "of_collection_name": "data_892"
   }
 ]
