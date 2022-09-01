@@ -146,6 +146,8 @@ def main():
         )  # lazy!
         # TODO: peek and report?
 
+    failcnt = 0
+
     for book in books:
         authors = book["author"].split("@@@")
         if getopt("apply_tortoise_shell_brackets_to_starting_of_byline", False):
@@ -263,11 +265,12 @@ def main():
 
                         do2()
             except Exception as e:
-                if getopt("skip_on_failures", False):
-                    logger.warning("Upload failed, skipping", exc_info=e)
-                else:
+                failcnt += 1
+                logger.warning("Upload failed", exc_info=e)
+                if not getopt("skip_on_failures", False):
                     raise e
         store_position(batch_name, book["id"])
+    logger.info(f"Batch done with {failcnt} failures.")
 
 
 if __name__ == "__main__":

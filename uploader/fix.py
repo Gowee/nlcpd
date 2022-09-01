@@ -34,6 +34,7 @@ def main():
     for n in range(1, 10 + 1):
         with open(os.path.join(DATA_DIR, f"民國期刊.{n}.json"), "r") as f:
             books.extend(json.load(f))
+
     for book in books:
         if len(book["volumes"]) == 1:
             volume = book["volumes"][0]
