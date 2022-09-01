@@ -122,6 +122,7 @@ class TxMongoPipeline(object):
         else:
             # buffer disabled
             if upsert_spec:
+                # TODO: retry manually on error since scrapy won't do so for pipelines
                 result = yield self.db[collection_name].update(
                     upsert_spec, processed_item, upsert=True
                 )
