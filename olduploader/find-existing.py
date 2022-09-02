@@ -47,7 +47,7 @@ if __name__ == "__main__":
             #     filename += f" {book['misc_metadata']['版本项']}"
             # else:
             #     filename += f" ({book['misc_metadata']['版本项']})"
-            filename = None # data.py will handle this
+            filename = None  # data.py will handle this
             renaming[int(book["id"])] = [
                 f"{title} ({book['misc_metadata']['版本项']})",
                 filename,

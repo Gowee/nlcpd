@@ -23,7 +23,14 @@ class BookSpider(scrapy.Spider):
     PRIO_VOLUME = 30
 
     def __init__(
-        self, category, start_page=1, end_page=0, no_book=False, no_volume=False, *args, **kwargs
+        self,
+        category,
+        start_page=1,
+        end_page=0,
+        no_book=False,
+        no_volume=False,
+        *args,
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.category = category

@@ -92,13 +92,38 @@ def getbook_unified(volume, proxies=None):
     )
 
 
-def fix_bookname_in_pagename(bookname):
-    bookname = bookname.replace("@@@", " ")
-    if bookname.startswith("[") and bookname.endswith("]"):  # [四家四六]
-        bookname = bookname[1:-1]
-    if bookname.startswith("["):
+def split_name_heuristic(name):
+    if name.endswith("不分卷"):
+        return name[:-3], "不分卷"
+    match = re.match(r"^(\S+?)\s*([一二三四五六七八九十]+[卷冊册])$", name)
+    if match is None:
+        return name, ""
+    else:
+        return match.group(1), match.group(2)
+
+
+def split_name_simple(name):
+    parts = tuple(name.split(maxsplit=1))
+    if len(parts) == 1:
+        parts += ("",)
+    return parts
+
+
+def fix_bookname_in_pagename(
+    bookname, apply_tortoise_shell_brackets_to_starting_of_title=False
+):
+    # if bookname.startswith("[") and bookname.endswith("]"):  # [四家四六]
+    #     bookname = bookname[1:-1]
+
+    if apply_tortoise_shell_brackets_to_starting_of_title and bookname.startswith("["):
         bookname = re.sub(r"\[(.+?)\]", r"〔\1〕", bookname)  # [宋]...
+    bookname = re.sub(r"\[(.+?)\]", r"\1", bookname)
     bookname = bookname.replace(":", "：")  # e.g. 404 00J001624 綠洲:中英文藝綜合月刊
+    bookname = bookname.replace("###", " ").replace("@@@", " ")
+    bookname = re.sub(r"\s+", " ", bookname)
+    bookname = bookname.replace(
+        "?", "□"
+    )  # WHITE SQUARE, U+25A1, for, e.g. 892 312001039388 筠清?金石文字   五卷"
     return bookname
 
 
@@ -118,6 +143,8 @@ def main():
     site.requests["timeout"] = 125
     site.chunk_size = 1024 * 1024 * 64
 
+    logger.info(f"Signed in as {username}")
+
     overwriting_categories = {
         (str(item["dbid"]), str(item["bookid"])): item["catname"]
         for item in chain(
@@ -135,6 +162,19 @@ def main():
         books = json.load(f)
     template = getopt("template")
     batch_link = getopt("link") or getopt("name")
+    global fix_bookname_in_pagename
+    fix_bookname_in_pagename = functools.partial(
+        fix_bookname_in_pagename,
+        apply_tortoise_shell_brackets_to_starting_of_title=getopt(
+            "apply_tortoise_shell_brackets_to_starting_of_title", False
+        ),
+    )
+    if getopt("split_name", "").lower() == "simple":
+        split_name = split_name_simple
+    elif getopt("split_name", "").lower() == "heuristic":
+        split_name = split_name_heuristic
+    else:
+        split_name = lambda s: (s, "")
 
     last_position = load_position(batch_name)
 
@@ -149,17 +189,48 @@ def main():
     failcnt = 0
 
     for book in books:
-        authors = book["author"].split("@@@")
+        assert "\uf8ff" not in book["author"]
+        byline = book["author"]
+        byline_enclosing_brackets = False
+        if book["author"].startswith("[") and book["author"].endswith("]"):
+            byline = byline[1:-1]
+            byline_enclosing_brackets = True
+            assert "[" not in byline
         if getopt("apply_tortoise_shell_brackets_to_starting_of_byline", False):
-            authors = [
-                re.sub(r"^[（(〔](.{0,3}?)[）)〕]", r"〔\1〕", author) for author in authors
-            ]
-        byline = "\n".join(authors)
-        title = book["name"]
+            # e.g. "(魏)王弼,(晋)韩康伯撰   (唐)邢璹撰"
+            atsb = lambda s: re.sub(
+                r"^([（(〔[][题題][]）)〕])?[（(〔[](.{0,3}?)[]）)〕]",
+                r"\1〔\2〕",
+                s,
+            )
+        else:
+            atsb = lambda s: s
+        # e.g. "（英國）韋廉臣（Williams,W.）撰"
+        byline = re.sub(r"(（[^）]+?)(,)([^）]+?）)", "\\1\uf8ff\\3", byline)
+        byline = " <br />\n".join(
+            " ".join(atsb(aauthor) for aauthor in re.split(r"[，,、]", author))
+            for author in re.split(
+                r"@@@|###@@@|   ",
+                byline,
+            )
+        )
+        byline = byline.replace("\uf8ff", ",")
+        if byline_enclosing_brackets:
+            byline = "[" + byline + "]"
+        title, note_in_title = split_name(book["name"].replace("?", "□"))
+        title = re.sub(r"\s+", " ", title)
+        note_in_title = re.sub(r"\s+", " ", note_in_title)
+        if getopt("split_name", None) is not None:
+            nit_field = f"  |note_in_title={note_in_title}\n"
+        else:
+            nit_field = ""
         if "@@@" in title:
-            title = (
-                "[" + title.replace("@@@", " ") + "]"
-            )  # http://www.nlc.cn/pcab/gjbhzs/bm/201412/P020150309516939790893.pdf §8.1.4, §8.1.6
+            # single \n does not render as expected
+            title = title.replace("###@@@", "@@@").replace("@@@", "\n\n")
+            # Now line feed is used in place of space, so we do not need this
+            # if getopt("apply_gbt3792_7_brackets_to_title", False):
+            #     title = "[" + title + "]"
+            # http://www.nlc.cn/pcab/gjbhzs/bm/201412/P020150309516939790893.pdf §8.1.4, §8.1.6
         volumes = book["volumes"]
         volumes.sort(key=lambda e: e["index_in_book"])
         metadata = book["misc_metadata"]
@@ -210,7 +281,7 @@ def main():
 {{{{{template}
   |byline={byline}
   |title={title}
-  |volume={volume_name}
+{nit_field}  |volume={volume_name}
   |abstract={abstract}
   |toc={toc}
   |catid={book['of_category_id']}
@@ -224,9 +295,9 @@ def main():
 
 [[{category_name}]]
 """
-            comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {byline} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[Category:{title}|{fix_bookname_in_pagename(title)}]])"
+            comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[Category:{title}|{fix_bookname_in_pagename(title)}]])"
             filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
-            assert all(char not in set(r'["$*|\]</^>') for char in filename)
+            assert all(char not in set(r'["$*|\]</^>@#') for char in filename)
             pagename = "File:" + filename
             page = site.pages[pagename]
             try:

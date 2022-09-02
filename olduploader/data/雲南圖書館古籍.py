@@ -111,7 +111,7 @@ def tasks():
                 mapping[0] if mapping and mapping[0] else title
             )
             # TODO: if the category is not with edition name, there might be troubles in the future
-            # if we categorize them into NLC/YNL 
+            # if we categorize them into NLC/YNL
             category_wikitext = """{{Category for book|zh}}
 {{zh-hant|%s}}
 %s
@@ -176,7 +176,12 @@ def tasks():
                         aid=int(volume["of_collection_name"].removeprefix("data_")),
                         bid=volume["id"],
                     )
-            sort_key = "|" + ((metadata['版本项'] if not (mapping and mapping[0]) else "") or "")  + str(idx).zfill(floor(log(len(volumes), 10)) + 1)
+
+            sort_key = (
+                "|"
+                + ((metadata["版本项"] if not (mapping and mapping[0]) else "") or "")
+                + str(idx).zfill(floor(log(len(volumes), 10)) + 1)
+            )
             volume_wikitext = f"""=={{{{int:filedesc}}}}==
 {{{{National_Library_of_China-Yunnan_Provincial_Library_Ancient_Books
   |byline={byline}

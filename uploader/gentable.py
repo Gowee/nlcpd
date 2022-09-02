@@ -4,6 +4,7 @@ import os
 import re
 import json
 import sys
+import functools
 
 import mwclient
 
@@ -11,12 +12,20 @@ CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.yml")
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
 
-def fix_bookname_in_pagename(bookname):
-    if bookname.startswith("[") and bookname.endswith("]"):  # [四家四六]
-        bookname = bookname[1:-1]
-    if bookname.startswith("["):
+def fix_bookname_in_pagename(
+    bookname, apply_tortoise_shell_brackets_to_starting_of_title=False
+):
+    # if bookname.startswith("[") and bookname.endswith("]"):  # [四家四六]
+    #     bookname = bookname[1:-1]
+
+    if apply_tortoise_shell_brackets_to_starting_of_title and bookname.startswith("["):
         bookname = re.sub(r"\[(.+?)\]", r"〔\1〕", bookname)  # [宋]...
-    bookname = bookname.replace(":", "：")
+    bookname = re.sub(r"\[(.+?)\]", r"\1", bookname)
+    bookname = bookname.replace(":", "：")  # e.g. 404 00J001624 綠洲:中英文藝綜合月刊
+    bookname = re.sub(r"\s+", " ", bookname)
+    bookname = bookname.replace(
+        "?", "□"
+    )  # WHITE SQUARE, U+25A1, for, e.g. 892 312001039388 筠清?金石文字   五卷"
     return bookname
 
 
@@ -39,6 +48,13 @@ def main():
     template = getopt("template")
     batch_link = getopt("link") or getopt("name")
     category_name = re.search(r"(Category:.+?)[]|]", batch_link).group(1)
+    global fix_bookname_in_pagename
+    fix_bookname_in_pagename = functools.partial(
+        fix_bookname_in_pagename,
+        apply_tortoise_shell_brackets_to_starting_of_title=getopt(
+            "apply_tortoise_shell_brackets_to_starting_of_title", False
+        ),
+    )
 
     lines = [
         f"== {batch_name} ==",
