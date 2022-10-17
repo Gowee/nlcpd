@@ -195,7 +195,7 @@ def main():
         if book["author"].startswith("[") and book["author"].endswith("]"):
             byline = byline[1:-1]
             byline_enclosing_brackets = True
-            assert "[" not in byline
+            # assert "[" not in byline # disabled due to: 411999012181 [(明)周士佐[等]修]
         if getopt("apply_tortoise_shell_brackets_to_starting_of_byline", False):
             # e.g. "(魏)王弼,(晋)韩康伯撰   (唐)邢璹撰"
             atsb = lambda s: re.sub(
@@ -295,7 +295,7 @@ def main():
 
 [[{category_name}]]
 """
-            comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[Category:{title}|{fix_bookname_in_pagename(title)}]])"
+            comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[Category:{category_name}|{title}]])"
             filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
             assert all(char not in set(r'["$*|\]</^>@#') for char in filename)
             pagename = "File:" + filename
