@@ -295,7 +295,7 @@ def main():
 
 [[{category_name}]]
 """
-            comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[Category:{category_name}|{title}]])"
+            comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[{category_name}|{title}]])"
             filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
             assert all(char not in set(r'["$*|\]</^>@#') for char in filename)
             pagename = "File:" + filename
