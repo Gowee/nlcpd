@@ -10,6 +10,7 @@ import functools
 import re
 import sys
 from itertools import chain
+from more_itertools import peekable
 
 import requests
 import yaml
@@ -176,6 +177,8 @@ def main():
     else:
         split_name = lambda s: (s, "")
 
+    booknavi = getopt("booknavi", "BookNaviBar2")
+
     last_position = load_position(batch_name)
 
     if last_position is not None:
@@ -256,28 +259,46 @@ def main():
                 category_wikitext,
                 f"Creating (batch task; nlc:{book['of_collection_name']},{book['id']})",
             )
-        for ivol, volume in enumerate(volumes):
-            abstract = book["introduction"].replace("###", "@@@").replace("@@@", "\n")
-            toc = gen_toc(volume["toc"])
-            volume_name = (
-                (
-                    volume["name"]
-                    .replace("_", "–")
-                    .replace("-", "–")
-                    .replace("/", "–")
-                    .replace("\n", " ")
-                    or f"第{ivol+1}冊"
+
+        def genvols():
+            for ivol, volume in enumerate(volumes):
+                abstract = (
+                    book["introduction"].replace("###", "@@@").replace("@@@", "\n")
                 )
-                if (
-                    len(volumes) > 1
-                    or getopt("always_include_volume_name_in_filename", False)
+                toc = gen_toc(volume["toc"])
+                volume_name = (
+                    (
+                        volume["name"]
+                        .replace("_", "–")
+                        .replace("-", "–")
+                        .replace("/", "–")
+                        .replace("\n", " ")
+                        or f"第{ivol+1}冊"
+                    )
+                    if (
+                        len(volumes) > 1
+                        or getopt("always_include_volume_name_in_filename", False)
+                    )
+                    else ""
                 )
-                else ""
-            )
-            volume_name_wps = (
-                (" " + volume_name) if volume_name else ""
-            )  # with preceding space
+                volume_name_wps = (
+                    (" " + volume_name) if volume_name else ""
+                )  # with preceding space
+                comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[{category_name}|{title}]])"
+                filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
+                assert all(char not in set(r'["$*|\]</^>@#') for char in filename)
+                pagename = "File:" + filename
+                yield (volume, volume_name, abstract, toc, comment, filename, pagename)
+
+        volsit = peekable(genvols())
+        prev_filename = None
+        for (volume, volume_name, abstract, toc, comment, filename, pagename) in volsit:
+            try:
+                next_filename = volsit.peek()[5]
+            except StopIteration:
+                next_filename = None
             volume_wikitext = f"""=={{{{int:filedesc}}}}==
+{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}
 {{{{{template}
   |byline={byline}
   |title={title}
@@ -289,16 +310,12 @@ def main():
   |dbid={dbid}
   |bookid={book["id"]}
   |volumeid={volume["id"]}
-{additional_fields}
-}}}}
-{"{{Watermark}}" if getopt("watermark_tag", False) else ""}
+  {additional_fields}
+  }}}}
+  {"{{Watermark}}" if getopt("watermark_tag", False) else ""}
 
 [[{category_name}]]
 """
-            comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[{category_name}|{title}]])"
-            filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
-            assert all(char not in set(r'["$*|\]</^>@#') for char in filename)
-            pagename = "File:" + filename
             page = site.pages[pagename]
             try:
                 if not page.exists:
@@ -340,6 +357,7 @@ def main():
                 logger.warning("Upload failed", exc_info=e)
                 if not getopt("skip_on_failures", False):
                     raise e
+            prev_filename = filename
         store_position(batch_name, book["id"])
     logger.info(f"Batch done with {failcnt} failures.")
 
