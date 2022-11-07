@@ -311,7 +311,7 @@ def main():
   |bookid={book["id"]}
   |volumeid={volume["id"]}
 {additional_fields}
-  }}}}
+}}}}
 {"{{Watermark}}" if getopt("watermark_tag", False) else ""}
 
 [[{category_name}]]
