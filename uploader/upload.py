@@ -310,9 +310,9 @@ def main():
   |dbid={dbid}
   |bookid={book["id"]}
   |volumeid={volume["id"]}
-  {additional_fields}
+{additional_fields}
   }}}}
-  {"{{Watermark}}" if getopt("watermark_tag", False) else ""}
+{"{{Watermark}}" if getopt("watermark_tag", False) else ""}
 
 [[{category_name}]]
 """
