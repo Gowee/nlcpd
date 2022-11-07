@@ -20,7 +20,7 @@ USER_AGENT = "nlcpdbot/0.0 (+https://github.com/gowee/nlcpd)"
 def getbook(aid: str, bid: str, proxies=None):
     resp = requests.get(
         URL_READER.format(aid=aid, bid=bid),
-        headers={"User_Agent": USER_AGENT},
+        headers={"User-Agent": USER_AGENT},
         proxies=proxies,
     )
     resp.raise_for_status()
@@ -64,7 +64,7 @@ def getbook(aid: str, bid: str, proxies=None):
     # print(time_key, time_flag, token_key)
     resp = requests.post(
         URL_FILE.format(aid=aid, bid=bid, kime=time_key, fime=time_flag),
-        headers={"User_Agent": USER_AGENT, "myreader": token_key},
+        headers={"User-Agent": USER_AGENT, "myreader": token_key},
         proxies=proxies,
     )
     resp.raise_for_status()
