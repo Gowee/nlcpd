@@ -13,7 +13,7 @@ source pyvenv/bin/activate
 pip install -U pip wheel
 
 # install some concrete packages
-pip install requests pyyaml mwclient zhconv-rs
+pip install requests pyyaml mwclient zhconv-rs more-itertools
 
 # or, install all packages from src/requirements.txt
 # pip install -r src/requirements.txt
