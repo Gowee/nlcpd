@@ -110,7 +110,6 @@ def main():
             if "{{booknavi|" not in wikitext:
                 navitext = f'''{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}'''
                 _wikitext = wikitext
-                print(r"{{" + template, r"{{" + template in wikitext)
                 needle = r"{{" + template
                 wikitext = wikitext.replace(needle, navitext + "\n" + needle)
                 # wikitext = re.sub(r"{{" + template, navitext + r"\n\0" , wikitext)
@@ -122,6 +121,7 @@ def main():
             else:
                 print(f"Skipped {pagename}")
             prev_filename = filename
+        print("All done")
 
     # lines.append("")
     # lines.append("[[" + category_name + "]]")
