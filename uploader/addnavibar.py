@@ -114,7 +114,7 @@ def main():
             if (cnt := wikitext.count(navitext + "\n")) > 1:
                 print(f"Cleaned {cnt} dup navis in {pagename}")
                 wikitext = wikitext.replace(navitext + "\n", "")
-            wikitext = wikitext.replace("{{Template:", "") # fix other
+            wikitext = wikitext.replace("{{Template:", "{{") # fix other
             # if ("{{" + booknavi + "|") not in wikitext:
             _wikitext = wikitext
             needle = r"{{" + template
