@@ -114,7 +114,7 @@ def main():
             if (cnt := wikitext.count(navitext + "\n")) > 1:
                 print(f"Cleaned {cnt} dup navis in {pagename}")
             wikitext = wikitext.replace(navitext + "\n", "")
-            wikitext = wikitext.replace("{{Template:", "{{") # fix other
+            wikitext = wikitext.replace("{{Template:", "{{")  # fix other
             # if ("{{" + booknavi + "|") not in wikitext:
             _wikitext = wikitext
             needle = r"{{" + template
@@ -123,7 +123,10 @@ def main():
             if wikitext == _wikitext:
                 print(wikitext)
                 raise Exception(f"failed to add navibar to {pagename}")
-            page.edit(wikitext, f"Add {booknavi} and fix redundant template prefix  (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link})")
+            page.edit(
+                wikitext,
+                f"Add {booknavi} and fix redundant template prefix  (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link})",
+            )
             print(f"Updated {pagename}")
             # else:
             #     print(f"Skipped {pagename}")
