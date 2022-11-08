@@ -121,7 +121,7 @@ def main():
             else:
                 print(f"Skipped {pagename}")
             prev_filename = filename
-        print("All done")
+    print("All done")
 
     # lines.append("")
     # lines.append("[[" + category_name + "]]")
