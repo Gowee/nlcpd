@@ -52,7 +52,7 @@ def main():
 
     with open(os.path.join(DATA_DIR, batch_name + ".json")) as f:
         batch = json.load(f)
-    template = "Template:" + getopt("template")
+    template = getopt("template")
     batch_link = getopt("link") or getopt("name")
     category_name = re.search(r"(Category:.+?)[]|]", batch_link).group(1)
     global fix_bookname_in_pagename
@@ -114,18 +114,19 @@ def main():
             if (cnt := wikitext.count(navitext + "\n")) > 1:
                 print(f"Cleaned {cnt} dup navis in {pagename}")
                 wikitext = wikitext.replace(navitext + "\n", "")
-            if ("{{" + booknavi + "|") not in wikitext:
-                _wikitext = wikitext
-                needle = r"{{" + template
-                wikitext = wikitext.replace(needle, navitext + "\n" + needle)
-                # wikitext = re.sub(r"{{" + template, navitext + r"\n\0" , wikitext)
-                if wikitext == _wikitext:
-                    print(wikitext)
-                    raise Exception(f"failed to add navibar to {pagename}")
-                page.edit(wikitext, f"Add {booknavi}")
-                print(f"Updated {pagename}")
-            else:
-                print(f"Skipped {pagename}")
+            wikitext = wikitext.replace("{{Template:", "") # fix other
+            # if ("{{" + booknavi + "|") not in wikitext:
+            _wikitext = wikitext
+            needle = r"{{" + template
+            wikitext = wikitext.replace(needle, navitext + "\n" + needle)
+            # wikitext = re.sub(r"{{" + template, navitext + r"\n\0" , wikitext)
+            if wikitext == _wikitext:
+                print(wikitext)
+                raise Exception(f"failed to add navibar to {pagename}")
+            page.edit(wikitext, f"Add {booknavi}")
+            print(f"Updated {pagename}")
+            # else:
+            #     print(f"Skipped {pagename}")
             prev_filename = filename
     print("All done")
 
