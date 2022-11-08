@@ -74,6 +74,7 @@ def main():
         # )
         volumes = book["volumes"]
         volumes.sort(key=lambda e: e["index_in_book"])
+
         def genvols():
             for ivol, volume in enumerate(volumes):
                 volume_name = (
@@ -97,6 +98,7 @@ def main():
                 filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
                 pagename = "File:" + filename
                 yield volume, filename, pagename
+
         prev_filename = None
         volsit = peekable(genvols())
         for volume, filename, pagename in volsit:
@@ -107,8 +109,12 @@ def main():
                 next_filename = None
             page = site.pages[pagename]
             wikitext = page.text()
-            if "{{booknavi|" not in wikitext:
-                navitext = f'''{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}'''
+            navitext = f"""{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}"""
+            # backwards fix
+            if (cnt := wikitext.count(navitext + "\n")) > 1:
+                print(f"Cleaned {cnt} dup navis in {pagename}")
+                wikitext = wikitext.replace(navitext + "\n", "")
+            if ("{{" + booknavi + "|") not in wikitext:
                 _wikitext = wikitext
                 needle = r"{{" + template
                 wikitext = wikitext.replace(needle, navitext + "\n" + needle)
@@ -127,10 +133,9 @@ def main():
     # lines.append("[[" + category_name + "]]")
     # lines.append("")
 
-
-        # site.pages[pagename].edit(
-        #     "\n".join(lines), f"Writing file list for batch {batch_name} to {pagename}"
-        # )
+    # site.pages[pagename].edit(
+    #     "\n".join(lines), f"Writing file list for batch {batch_name} to {pagename}"
+    # )
 
 
 if __name__ == "__main__":
