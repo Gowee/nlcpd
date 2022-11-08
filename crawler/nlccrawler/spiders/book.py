@@ -156,31 +156,73 @@ class BookSpider(scrapy.Spider):
         ):
             # possibly empty; aa: 云南图书馆, tt: 宋人文集
             volume_name = volume.css(".aa::text, .tt::text, span::text").get()
-            volume_url = volume.css('a[href*="/OpenObjectBook"]::attr(href)').get()
-            volume_url_params = dict(parse_qsl(urlparse(volume_url).query))
-
-            assert "data_" + volume_url_params.get("aid") == collection_name
-            # volume_id contains a trailing ".0" somewhere
-            volume_id = volume_url_params["bid"].removesuffix(".0")
-            # volume_url = urljoin(response.url, volume_url)
-
-            if not self.no_volume:
-                yield response.follow(
-                    self.URL_VOLUME_READER.format(
-                        collection_id=collection_name.removeprefix("data_"),
-                        volume_id=volume_id,
-                    ),
-                    priority=self.PRIO_VOLUME,
-                    meta={
+            if open_side_by_side := volume.css(
+                'a[onclick^="openTwoBookNew"]::attr(onclick)'
+            ).get():
+                # e.g. http://read.nlc.cn/allSearch/searchDetail?searchType=12&showType=1&indexName=data_403&fid=312001060125
+                match = re.match(
+                    r"""openTwoBookNew\(\s*['"]([^'"]*)['"]\s*,\s*['"]([^'"]*)['"]\s*,\s*['"]([^'"]*)['"]\s*,\s*['"]([^'"]*)['"]\s*,\s*['"]([^'"]*)['"]\s*,\s*['"]([^'"]*)['"]\s*\)""",
+                    open_side_by_side,
+                )
+                assert (
+                    match
+                ), f"Failed to parse the side by side button of the {vidx+1} volume of the book {book_id}"
+                volume_id = match.group(1).removesuffix(".0")
+                secondary_volume_id = match.group(2).removesuffix(".0")
+                file_path = match.group(4)
+                secondary_volume_file_path = match.group(5)
+                response.meta.update(
+                    {
                         "collection_name": collection_name,
                         "page": page,
                         "book_id": book_id,
                         "volume_id": volume_id,
                         "volume_name": volume_name,
                         "index_in_book": vidx,
-                    },
-                    callback=self.parse_volume_reader,
+                        "volume_file_path": file_path,
+                        "secondary_volume_id": secondary_volume_id,
+                        "secondary_volume_file_path": secondary_volume_file_path,
+                    }
                 )
+                yield response.follow(
+                    self.URL_VOLUME_TOC,
+                    method="POST",
+                    headers={"Content-Type": "application/x-www-form-urlencoded"},
+                    body=urlencode(
+                        {
+                            "id": volume_id,
+                            "indexName": response.meta["collection_name"],
+                        }
+                    ),
+                    meta=response.meta,
+                    priority=self.PRIO_VOLUME,
+                    callback=self.parse_volume_toc,
+                )
+            else:
+                volume_url = volume.css('a[href*="/OpenObjectBook"]::attr(href)').get()
+                volume_url_params = dict(parse_qsl(urlparse(volume_url).query))
+                assert "data_" + (volume_url_params.get("aid") or "") == collection_name
+                # volume_id contains a trailing ".0" somewhere
+                volume_id = volume_url_params["bid"].removesuffix(".0")
+                # volume_url = urljoin(response.url, volume_url)
+
+                if not self.no_volume:
+                    yield response.follow(
+                        self.URL_VOLUME_READER.format(
+                            collection_id=collection_name.removeprefix("data_"),
+                            volume_id=volume_id,
+                        ),
+                        priority=self.PRIO_VOLUME,
+                        meta={
+                            "collection_name": collection_name,
+                            "page": page,
+                            "book_id": book_id,
+                            "volume_id": volume_id,
+                            "volume_name": volume_name,
+                            "index_in_book": vidx,
+                        },
+                        callback=self.parse_volume_reader,
+                    )
             volumes.append((volume_id, volume_name))
 
         yield BookItem(
@@ -227,6 +269,12 @@ class BookSpider(scrapy.Spider):
         volume_id = response.meta["volume_id"]
         volume_name = response.meta["volume_name"]
         volume_file_path = response.meta["volume_file_path"]
+        secondary_volume = None
+        if "secondary_volume_id" in response.meta:
+            secondary_volume = {
+                "id": response.meta["secondary_volume_id"],
+                "file_path": response.meta["secondary_volume_file_path"],
+            }
 
         d = response.json()
         assert d["success"]
@@ -250,6 +298,7 @@ class BookSpider(scrapy.Spider):
             name=volume_name,
             file_path=volume_file_path,
             toc=toc,
+            secondary_volume=secondary_volume,
             index_in_book=index_in_book,
             of_book_id=book_id,
             of_collection_name=collection_name,

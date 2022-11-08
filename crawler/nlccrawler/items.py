@@ -93,10 +93,16 @@ class BookItem:
 class VolumeItem:
     """ "A volume of a book, corresponding to a file"""
 
+    @dataclass
+    class SecondaryVolumeItem:
+        id: str  # cid (for side-by-side such as 数字方志)
+        file_path: str
+
     id: str  # bid
     name: str
     file_path: Optional[str]  # internal file path of NLC
     toc: list[Tuple[str, str]]  # list of chapter number and capther name pairs
+    secondary_volume: Optional[SecondaryVolumeItem]
     index_in_book: int
     of_book_id: str
     of_collection_name: str
