@@ -45,7 +45,7 @@ def main():
 
     with open(os.path.join(DATA_DIR, batch_name + ".json")) as f:
         batch = json.load(f)
-    template = "Template:" + getopt("template")
+    template = getopt("template")
     batch_link = getopt("link") or getopt("name")
     category_name = re.search(r"(Category:.+?)[]|]", batch_link).group(1)
     global fix_bookname_in_pagename
