@@ -109,6 +109,9 @@ def main():
                 next_filename = None
             page = site.pages[pagename]
             wikitext = page.text()
+            if wikitext.lstrip().startswith("#REDIRECT"):  # e.g. 飲膳正要
+                prev_filename = filename
+                break
             navitext = f"""{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}"""
             # backwards fix
             if (cnt := wikitext.count(navitext + "\n")) > 1:
