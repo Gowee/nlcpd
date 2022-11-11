@@ -26,7 +26,7 @@ class BookSpider(scrapy.Spider):
         self,
         category,
         start_page=1,
-        end_page=0,
+        end_page=0,  # inclusive
         no_book=False,
         no_volume=False,
         *args,
@@ -101,8 +101,6 @@ class BookSpider(scrapy.Spider):
                 )
 
         self.log(f"Got {idx + 1} books on page {page}")
-        if page == self.end_page:
-            return
         if idx != -1:
             # page contains > 0 books
             yield PageItem(
@@ -111,6 +109,8 @@ class BookSpider(scrapy.Spider):
                 of_category_id=self.category,
                 of_category_name=category_name,
             )
+            if page == self.end_page:
+                return
             page += 1
             yield response.follow(
                 self.URL_LIST_PAGE.format(category=self.category, page=page),
@@ -127,6 +127,18 @@ class BookSpider(scrapy.Spider):
         # assert book_id == response.css("input#identifier::attr(value)").get() # input are not filled
         # assert collection_name == response.css("input#indexName::attr(value)").get()
         title = response.css("input#title::attr(value)").get().strip()
+        if not title:
+            self.log(
+                f"No title found in input#title for {collection_name}, {book_id}",
+                level=logging.DEBUG,
+            )
+            title = (
+                response.css(".SZZY2018_Book .title::text").get().strip()
+            )  # fallback
+            self.log(
+                f".SZZY2018_Book .title for {collection_name}, {book_id} is {title}",
+                level=logging.DEBUG,
+            )
         author = response.css("input#author::attr(value)").get()
         keywords = response.css("input#Keyword::attr(value)").get(
             default=response.css("input#subject::attr(value)").get(default=None)
