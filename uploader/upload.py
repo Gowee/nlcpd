@@ -284,22 +284,116 @@ def main():
                 volume_name_wps = (
                     (" " + volume_name) if volume_name else ""
                 )  # with preceding space
-                comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[{category_name}|{title}]])"
                 filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
                 assert all(char not in set(r'["$*|\]</^>@#') for char in filename)
                 pagename = "File:" + filename
-                yield (volume, volume_name, abstract, toc, comment, filename, pagename)
+                comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[{category_name}|{title}]])"
+                secondary_task = None
+                if secondary_volume := volume.get("secondary_volume"):
+                    secondary_comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{secondary_volume['id']}; {batch_link}; [[{category_name}|{title}]]; secondary_to: [[{pagename}|{volume['id']}]])"
+                    secondary_filename = f'NLC{dbid}-{book["id"]}-{secondary_volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
+                    secondary_pagename = "File:" + secondary_filename
+                    secondary_task = (
+                        secondary_volume,
+                        secondary_comment,
+                        secondary_filename,
+                        secondary_pagename,
+                    )
+                yield (
+                    ivol,
+                    volume,
+                    volume_name,
+                    volume_name_wps,
+                    abstract,
+                    toc,
+                    comment,
+                    filename,
+                    pagename,
+                    secondary_task,
+                )
 
         volsit = peekable(genvols())
         prev_filename = None
-        for (volume, volume_name, abstract, toc, comment, filename, pagename) in volsit:
+        prev_secondary_filename = None
+        for (
+            ivol,
+            volume,
+            volume_name,
+            volume_name_wps,
+            abstract,
+            toc,
+            comment,
+            filename,
+            pagename,
+            secondary_task,
+        ) in volsit:
             try:
                 next_filename = volsit.peek()[5]
             except StopIteration:
                 next_filename = None
-            volume_wikitext = f"""=={{{{int:filedesc}}}}==
-{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}
-{{{{{template}
+            if secondary_task is not None:
+                (
+                    secondary_volume,
+                    secondary_comment,
+                    secondary_filename,
+                    secondary_pagename,
+                ) = secondary_task
+                try:
+                    next_secondary_task = volsit.peek()[-1]
+                    (
+                        _next_secondary_volume,
+                        _next_secondary_comment,
+                        next_secondary_filename,
+                        _next_secondary_pagename,
+                    ) = next_secondary_task
+                except StopIteration:
+                    next_secondary_task = None
+
+            def do_upload(volume_id, filename, pagename, volume_wikitext, comment):
+                nonlocal failcnt
+                page = site.pages[pagename]
+                try:
+                    if not page.exists:
+                        logger.info(f'Downloading {dbid},{book["id"]},{volume_id}')
+                        binary = getbook_unified(volume, nlc_proxies)
+                        logger.info(f"Uploading {pagename} ({len(binary)} B)")
+
+                        @retry()
+                        def do1():
+                            r = site.upload(
+                                BytesIO(binary),
+                                filename=filename,
+                                description=volume_wikitext,
+                                comment=comment,
+                            )
+                            assert (r or {}).get("result", {}) == "Success" or (
+                                r or {}
+                            ).get("warnings", {}).get("exists"), f"Upload failed {r}"
+
+                        do1()
+                    else:
+                        if getopt("skip_on_existing", False):
+                            logger.debug(f"{pagename} exists, skipping")
+                        else:
+                            logger.info(f"{pagename} exists, updating wikitext")
+
+                            @retry()
+                            def do2():
+                                r = page.edit(
+                                    volume_wikitext, comment + " (Updating metadata)"
+                                )
+                                assert (r or {}).get(
+                                    "result", {}
+                                ) == "Success", f"Update failed {r}"
+
+                            do2()
+                except Exception as e:
+                    failcnt += 1
+                    logger.warning("Upload failed", exc_info=e)
+                    if not getopt("skip_on_failures", False):
+                        raise e
+
+            common_fields = f"""
   |byline={byline}
   |title={title}
 {nit_field}  |volume={volume_name}
@@ -309,6 +403,12 @@ def main():
   |db={volume["of_collection_name"]}
   |dbid={dbid}
   |bookid={book["id"]}
+"""
+            if secondary_task is None:
+                primary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
+{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}
+{{{{{template}
+{common_fields}
   |volumeid={volume["id"]}
 {additional_fields}
 }}}}
@@ -316,47 +416,45 @@ def main():
 
 [[{category_name}]]
 """
-            page = site.pages[pagename]
-            try:
-                if not page.exists:
-                    logger.info(f'Downloading {dbid},{book["id"]},{volume["id"]}')
-                    binary = getbook_unified(volume, nlc_proxies)
-                    logger.info(f"Uploading {pagename} ({len(binary)} B)")
+                do_upload(
+                    volume["id"], filename, pagename, primary_volume_wikitext, comment
+                )
+            else:
+                primary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
+{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}|secondaryvolumeid={secondary_volume["id"]}}}}}
+{{{{{template}
+{common_fields}
+  |volumeid={volume["id"]}
+  |secondaryvolumeid={secondary_volume["id"]}
+{additional_fields}
+}}}}
+{"{{Watermark}}" if getopt("watermark_tag", False) else ""}
 
-                    @retry()
-                    def do1():
-                        r = site.upload(
-                            BytesIO(binary),
-                            filename=filename,
-                            description=volume_wikitext,
-                            comment=comment,
-                        )
-                        assert (r or {}).get("result", {}) == "Success" or (
-                            r or {}
-                        ).get("warnings", {}).get("exists"), f"Upload failed {r}"
+[[{category_name}]]
+"""
+                secondary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
+{{{{{booknavi}|prev={prev_secondary_filename or ""}|next={next_secondary_filename or ""}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={secondary_volume["id"]}|primaryvolumeid={volume["id"]}}}}}
+{{{{{template}
+{common_fields}
+  |volumeid={secondary_volume["id"]}
+  |primaryvolumeid={volume["id"]}
+{additional_fields}
+}}}}
+{"{{Watermark}}" if getopt("watermark_tag", False) else ""}
 
-                    do1()
-                else:
-                    if getopt("skip_on_existing", False):
-                        logger.debug(f"{pagename} exists, skipping")
-                    else:
-                        logger.info(f"{pagename} exists, updating wikitext")
-
-                        @retry()
-                        def do2():
-                            r = page.edit(
-                                volume_wikitext, comment + " (Updating metadata)"
-                            )
-                            assert (r or {}).get(
-                                "result", {}
-                            ) == "Success", f"Update failed {r}"
-
-                        do2()
-            except Exception as e:
-                failcnt += 1
-                logger.warning("Upload failed", exc_info=e)
-                if not getopt("skip_on_failures", False):
-                    raise e
+[[{category_name}]]
+"""
+                do_upload(
+                    volume["id"], filename, pagename, primary_volume_wikitext, comment
+                )
+                do_upload(
+                    secondary_volume["id"],
+                    filename,
+                    pagename,
+                    primary_volume_wikitext,
+                    secondary_comment,
+                )
+            prev_secondary_filename = filename
             prev_filename = filename
         store_position(batch_name, book["id"])
     logger.info(f"Batch done with {failcnt} failures.")
