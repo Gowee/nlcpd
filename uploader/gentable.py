@@ -55,6 +55,9 @@ def main():
             "apply_tortoise_shell_brackets_to_starting_of_title", False
         ),
     )
+    pubdate_as_suffix_on = getopt("pubdate_as_suffix_on")
+    if pubdate_as_suffix_on:
+        pubdate_as_suffix_on = re.compile(pubdate_as_suffix_on)
 
     lines = [
         f"== {batch_name} ==",
@@ -70,6 +73,13 @@ def main():
         )
         volumes = book["volumes"]
         volumes.sort(key=lambda e: e["index_in_book"])
+        book_name_suffix_wps = ""
+        if (
+            pubdate_as_suffix_on
+            and pubdate_as_suffix_on.search(book["name"])
+            and (pubdate := book["misc_metadata"].get("出版时间"))
+        ):
+            book_name_suffix_wps = " " + pubdate.replace("[", "(").replace("]", ")")
         for ivol, volume in enumerate(volumes):
             volume_name = (
                 (
@@ -89,9 +99,14 @@ def main():
             volume_name_wps = (
                 (" " + volume_name) if volume_name else ""
             )  # with preceding space
-            filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
+            filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{book_name_suffix_wps}{volume_name_wps}.pdf'
             pagename = "File:" + filename
-            lines.append(f"** [[:{pagename}]]")
+            if secondary_volume := volume.get("secondary_volume"):
+                secondary_filename = f'NLC{dbid}-{book["id"]}-{secondary_volume["id"]} {fix_bookname_in_pagename(book["name"])}{book_name_suffix_wps}{volume_name_wps}.pdf'
+                secondary_pagename = "File:" + secondary_filename
+                lines.append(f"** [[:{pagename}]] ⇔ [[:{secondary_pagename}]]")
+            else:
+                lines.append(f"** [[:{pagename}]]")
     lines.append("")
     lines.append("[[" + category_name + "]]")
     lines.append("")
