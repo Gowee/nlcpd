@@ -85,11 +85,12 @@ def gen_toc(toc):
 
 
 @retry()
-def getbook_unified(volume, proxies=None):
+def getbook_unified(volume, secondary=False, proxies=None):
     logger.debug(f"Fetching {volume}")
     # if "fileiplogger.info("Failed to get file by path: " + str(e), ", fallbacking to getbook")
+    volume_id = volume["id"] if not secondary else volume["secondary_volume"]["id"]
     return getbook(
-        volume["of_collection_name"].removeprefix("data_"), volume["id"], proxies
+        volume["of_collection_name"].removeprefix("data_"), volume_id, proxies
     )
 
 
@@ -179,6 +180,19 @@ def main():
 
     booknavi = getopt("booknavi", "BookNaviBar2")
 
+    if pubdate_as_suffix := getopt("pubdate_as_suffix"):
+        pubdate_as_suffix["incl"] = re.compile(pubdate_as_suffix["incl"])
+        pubdate_as_suffix["excls"] = [
+            re.compile(exc) for exc in pubdate_as_suffix["excls"]
+        ]
+
+    def should_use_pubdate_as_suffix(title):
+        return (
+            pubdate_as_suffix
+            and pubdate_as_suffix["incl"].search(title)
+            and not any(exc.search(title) for exc in pubdate_as_suffix["excls"])
+        )
+
     last_position = load_position(batch_name)
 
     if last_position is not None:
@@ -234,6 +248,13 @@ def main():
             # if getopt("apply_gbt3792_7_brackets_to_title", False):
             #     title = "[" + title + "]"
             # http://www.nlc.cn/pcab/gjbhzs/bm/201412/P020150309516939790893.pdf §8.1.4, §8.1.6
+
+        book_name_suffix_wps = ""
+        if should_use_pubdate_as_suffix(book["name"]) and (
+            pubdate := book["misc_metadata"].get("出版时间")
+        ):
+            book_name_suffix_wps = " " + pubdate.replace("[", "(").replace("]", ")")
+
         volumes = book["volumes"]
         volumes.sort(key=lambda e: e["index_in_book"])
         metadata = book["misc_metadata"]
@@ -284,26 +305,26 @@ def main():
                 volume_name_wps = (
                     (" " + volume_name) if volume_name else ""
                 )  # with preceding space
-                filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
-                assert all(char not in set(r'["$*|\]</^>@#') for char in filename)
+                filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{book_name_suffix_wps}{volume_name_wps}.pdf'
                 pagename = "File:" + filename
-                comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[{category_name}|{title}]])"
                 secondary_task = None
                 if secondary_volume := volume.get("secondary_volume"):
-                    secondary_comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{secondary_volume['id']}; {batch_link}; [[{category_name}|{title}]]; secondary_to: [[{pagename}|{volume['id']}]])"
-                    secondary_filename = f'NLC{dbid}-{book["id"]}-{secondary_volume["id"]} {fix_bookname_in_pagename(book["name"])}{volume_name_wps}.pdf'
+                    secondary_filename = f'NLC{dbid}-{book["id"]}-{secondary_volume["id"]} {fix_bookname_in_pagename(book["name"])}{book_name_suffix_wps}{volume_name_wps}.pdf'
                     secondary_pagename = "File:" + secondary_filename
+                    comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']},primary_to:[[{secondary_pagename}|{secondary_volume['id']}]]; {batch_link}; [[{category_name}|{title}]])"
+                    secondary_comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{secondary_volume['id']},secondary_to:[[{pagename}|{volume['id']}]]; {batch_link}; [[{category_name}|{title}]])"
                     secondary_task = (
                         secondary_volume,
                         secondary_comment,
                         secondary_filename,
                         secondary_pagename,
                     )
+                else:
+                    comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[{category_name}|{title}]])"
+
                 yield (
-                    ivol,
                     volume,
                     volume_name,
-                    volume_name_wps,
                     abstract,
                     toc,
                     comment,
@@ -316,10 +337,8 @@ def main():
         prev_filename = None
         prev_secondary_filename = None
         for (
-            ivol,
             volume,
             volume_name,
-            volume_name_wps,
             abstract,
             toc,
             comment,
@@ -349,13 +368,24 @@ def main():
                 except StopIteration:
                     next_secondary_task = None
 
-            def do_upload(volume_id, filename, pagename, volume_wikitext, comment):
+            def do_upload(
+                filename, pagename, volume_wikitext, comment, secondary=False
+            ):
                 nonlocal failcnt
+                assert all(char not in set(r'["$*|\]</^>@#') for char in filename)
                 page = site.pages[pagename]
                 try:
                     if not page.exists:
-                        logger.info(f'Downloading {dbid},{book["id"]},{volume_id}')
-                        binary = getbook_unified(volume, nlc_proxies)
+                        volume_id = (
+                            volume["id"]
+                            if not secondary
+                            else volume["secondary_volume"]["id"]
+                        )
+                        note = " (secondary)" if secondary else ""
+                        logger.info(
+                            f'Downloading {dbid},{book["id"]},{volume_id}{note}'
+                        )
+                        binary = getbook_unified(volume, secondary, nlc_proxies)
                         logger.info(f"Uploading {pagename} ({len(binary)} B)")
 
                         @retry()
@@ -393,7 +423,8 @@ def main():
                     if not getopt("skip_on_failures", False):
                         raise e
 
-            common_fields = f"""
+            nth = volume["index_in_book"] + 1
+            common_fields = f"""\
   |byline={byline}
   |title={title}
 {nit_field}  |volume={volume_name}
@@ -403,10 +434,12 @@ def main():
   |db={volume["of_collection_name"]}
   |dbid={dbid}
   |bookid={book["id"]}
+  |volumenth={nth}
+  |volumetotal={len(volumes)}\
 """
             if secondary_task is None:
                 primary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
-{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}
+{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={nth}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}
 {{{{{template}
 {common_fields}
   |volumeid={volume["id"]}
@@ -416,15 +449,14 @@ def main():
 
 [[{category_name}]]
 """
-                do_upload(
-                    volume["id"], filename, pagename, primary_volume_wikitext, comment
-                )
+                do_upload(filename, pagename, primary_volume_wikitext, comment)
             else:
                 primary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
-{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}|secondaryvolumeid={secondary_volume["id"]}}}}}
+{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|secondaryvolume={secondary_filename}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}|secondaryvolumeid={secondary_volume["id"]}}}}}
 {{{{{template}
 {common_fields}
   |volumeid={volume["id"]}
+  |secondaryvolume={secondary_filename}
   |secondaryvolumeid={secondary_volume["id"]}
 {additional_fields}
 }}}}
@@ -433,10 +465,11 @@ def main():
 [[{category_name}]]
 """
                 secondary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
-{{{{{booknavi}|prev={prev_secondary_filename or ""}|next={next_secondary_filename or ""}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={secondary_volume["id"]}|primaryvolumeid={volume["id"]}}}}}
+{{{{{booknavi}|prev={prev_secondary_filename or ""}|next={next_secondary_filename or ""}|primaryvolume={filename}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={secondary_volume["id"]}|primaryvolumeid={volume["id"]}}}}}
 {{{{{template}
 {common_fields}
   |volumeid={secondary_volume["id"]}
+  |primaryvolume={filename}
   |primaryvolumeid={volume["id"]}
 {additional_fields}
 }}}}
@@ -445,14 +478,18 @@ def main():
 [[{category_name}]]
 """
                 do_upload(
-                    volume["id"], filename, pagename, primary_volume_wikitext, comment
-                )
-                do_upload(
-                    secondary_volume["id"],
                     filename,
                     pagename,
                     primary_volume_wikitext,
+                    comment,
+                    secondary=False,
+                )
+                do_upload(
+                    secondary_filename,
+                    secondary_pagename,
+                    secondary_volume_wikitext,
                     secondary_comment,
+                    secondary=True,
                 )
             prev_secondary_filename = filename
             prev_filename = filename

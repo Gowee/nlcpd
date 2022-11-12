@@ -55,13 +55,23 @@ def main():
             "apply_tortoise_shell_brackets_to_starting_of_title", False
         ),
     )
-    pubdate_as_suffix_on = getopt("pubdate_as_suffix_on")
-    if pubdate_as_suffix_on:
-        pubdate_as_suffix_on = re.compile(pubdate_as_suffix_on)
+
+    if pubdate_as_suffix := getopt("pubdate_as_suffix"):
+        pubdate_as_suffix["incl"] = re.compile(pubdate_as_suffix["incl"])
+        pubdate_as_suffix["excls"] = [
+            re.compile(exc) for exc in pubdate_as_suffix["excls"]
+        ]
+
+    def should_use_pubdate_as_suffix(title):
+        return (
+            pubdate_as_suffix
+            and pubdate_as_suffix["incl"].search(title)
+            and not any(exc.search(title) for exc in pubdate_as_suffix["excls"])
+        )
 
     lines = [
         f"== {batch_name} ==",
-        f"Category: {batch_link}, Template: {{{{Template|{template}}}}}, Books: {len(batch)}, Files: {sum(map(lambda e: len(e['volumes']), batch))}\n",
+        f"Category: {batch_link}, Template: {{{{Template|{template}}}}}, Books: {len(batch)}, Volumes: {sum(map(lambda e: len(e['volumes']), batch))}\n",
     ]
 
     for book in batch:
@@ -74,10 +84,8 @@ def main():
         volumes = book["volumes"]
         volumes.sort(key=lambda e: e["index_in_book"])
         book_name_suffix_wps = ""
-        if (
-            pubdate_as_suffix_on
-            and pubdate_as_suffix_on.search(book["name"])
-            and (pubdate := book["misc_metadata"].get("出版时间"))
+        if should_use_pubdate_as_suffix(book["name"]) and (
+            pubdate := book["misc_metadata"].get("出版时间")
         ):
             book_name_suffix_wps = " " + pubdate.replace("[", "(").replace("]", ")")
         for ivol, volume in enumerate(volumes):
