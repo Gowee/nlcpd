@@ -193,6 +193,9 @@ def main():
             and not any(exc.search(title) for exc in pubdate_as_suffix["excls"])
         )
 
+    watermark_tag = getopt("watermark_tag", False)
+    watermark_tag_for_secondary = getopt("watermark_tag_for_secondary", None)
+
     last_position = load_position(batch_name)
 
     if last_position is not None:
@@ -445,7 +448,7 @@ def main():
   |volumeid={volume["id"]}
 {additional_fields}
 }}}}
-{"{{Watermark}}" if getopt("watermark_tag", False) else ""}
+{"{{Watermark}}" if watermark_tag else ""}
 
 [[{category_name}]]
 """
@@ -460,7 +463,7 @@ def main():
   |secondaryvolumeid={secondary_volume["id"]}
 {additional_fields}
 }}}}
-{"{{Watermark}}" if getopt("watermark_tag", False) else ""}
+{"{{Watermark}}" if watermark_tag else ""}
 
 [[{category_name}]]
 """
@@ -473,7 +476,7 @@ def main():
   |primaryvolumeid={volume["id"]}
 {additional_fields}
 }}}}
-{"{{Watermark}}" if getopt("watermark_tag", False) else ""}
+{"{{Watermark}}" if watermark_tag and watermark_tag_for_secondary != False else ""}
 
 [[{category_name}]]
 """
