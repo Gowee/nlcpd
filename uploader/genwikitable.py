@@ -126,13 +126,13 @@ def main():
             # else:
             #     lines.append(f"** [[:{pagename}]]")
             if ivol == 0:
-                assert re.sub(r"\s+", " ", book["author"].strip()) == re.sub(
+                assert re.sub(r"(\s|#)+", " ", book["author"].strip()) == re.sub(
                     r"\s+",
                     " ",
                     book["misc_metadata"]
                     .get("責任者", book["misc_metadata"].get("责任者", ""))
                     .strip(),
-                ), f"""{repr(book['author'])} != {repr(book['misc_metadata'].get("責任者", book['misc_metadata'].get("责任者", "")))}"""
+                ), f"""{repr(book['author'])} != {repr(book['misc_metadata'].get("責任者", book['misc_metadata'].get("责任者", "")))} for NLC{dbid}-{book['id']}"""
                 lines.append(
                     f"""| [[:{pagename}]] || {rowspan}{book['name']} {{{{NLC-Book-Link|{dbid}|{book["id"]}|catid={book["of_category_id"]}}}}} || {rowspan}{book['author']} || {rowspan}{book['misc_metadata'].get('出版時間', book['misc_metadata'].get('出版时间', ''))} || {rowspan}{book['misc_metadata'].get('出版者', '')}
 |-"""

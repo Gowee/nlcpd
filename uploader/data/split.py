@@ -3,20 +3,10 @@ import sys
 import json
 
 
-def main():
-    try:
-        path = sys.argv[1]
-        limit = int(sys.argv[2])
-    except IndexError:
-        exit(f"Usage: {sys.argv[0]} INPUT_JSON CHUNK_SIZE [sort]")
-
+def dosplit(path, limit, sort_books_by_id):
     with open(path) as f:
         d = json.load(f)
 
-    try:
-        sort_books_by_id = sys.argv[3].lower() == "sort"
-    except:
-        sort_books_by_id = False
     if sort_books_by_id:
         print("sorting book")
         l = max(len(str(b["id"])) for b in d)
@@ -47,4 +37,15 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        path = sys.argv[1]
+        limit = int(sys.argv[2])
+    except IndexError:
+        exit(f"Usage: {sys.argv[0]} INPUT_JSON CHUNK_SIZE [sort]")
+
+    try:
+        sort_books_by_id = sys.argv[3].lower() == "sort"
+    except:
+        sort_books_by_id = False
+
+    dosplit(path, limit, sort_books_by_id)
