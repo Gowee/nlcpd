@@ -76,6 +76,12 @@ def main():
 
     for book in batch:
         book["name"] = book["name"].replace("@@@", " ")
+        if '"' in (
+            author := book["misc_metadata"].get(
+                "責任者", book["misc_metadata"].get("责任者"), ""
+            )
+        ):
+            book["author"] = author.replace("   ", " ")
         book["author"] = book["author"].replace("@@@", " ")
         dbid = book["of_collection_name"].removeprefix("data_")
         lines.append(

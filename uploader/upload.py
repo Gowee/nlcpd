@@ -210,6 +210,17 @@ def main():
 
     for book in books:
         assert "\uf8ff" not in book["author"]
+        if '"' in (
+            author := book["misc_metadata"].get(
+                "責任者", book["misc_metadata"].get("责任者", "")
+            )
+        ):
+            # book["author"] is extracted from input[type=text] while the latter is extracted from
+            # HTML text
+            # the NLC system failed to do espace properly, resulted in malformed input tag when
+            # there is a double quote in the value
+            # so just fallback to the latter field here
+            book["author"] = author.replace("   ", " ")
         byline = book["author"]
         byline_enclosing_brackets = False
         if book["author"].startswith("[") and book["author"].endswith("]"):
