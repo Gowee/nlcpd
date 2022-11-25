@@ -10,6 +10,7 @@ import functools
 import re
 import sys
 from itertools import chain
+from datetime import datetime, timezone
 from more_itertools import peekable
 
 import requests
@@ -24,6 +25,9 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 RETRY_TIMES = 3
 
 USER_AGENT = "nlcpdbot/0.0 (+https://github.com/gowee/nlcpd)"
+
+# https://stackoverflow.com/a/17280876/5488616
+MINIMUM_VALID_PDF_SIZE = 67
 
 # RESP_DUMP_PATH = "/tmp/wmc_upload_resp_dump.html"
 
@@ -195,6 +199,18 @@ def main():
 
     watermark_tag = getopt("watermark_tag", False)
     watermark_tag_for_secondary = getopt("watermark_tag_for_secondary", None)
+
+    def log_to_wiki(l):
+        d = str(datetime(2022, 11, 25, 2, 21, 21, 227193, tzinfo=timezone.utc))
+        page_name = config["logpage"] or f'User:{config["username"].split("@")[0]}/log'
+        page = site.pages[page_name]
+        wikitext = ""
+        if page.exists:
+            wikitext = page.text()
+        wikitext += f"\n* <code>{d}</code> " + l + "\n"
+        print(wikitext)
+        logger.debug(f"add log to wiki: {l}")
+        page.edit(wikitext, f"Log (batch:nlc; {batch_link}): {l}")
 
     last_position = load_position(batch_name)
 
@@ -400,6 +416,14 @@ def main():
                             f'Downloading {dbid},{book["id"]},{volume_id}{note}'
                         )
                         binary = getbook_unified(volume, secondary, nlc_proxies)
+                        # https://stackoverflow.com/a/17280876/5488616
+                        if len(binary) < MINIMUM_VALID_PDF_SIZE:
+                            log_to_wiki(
+                                f"[[:{pagename}]] is too small ({len(binary)} < {MINIMUM_VALID_PDF_SIZE}) to be well-formed"
+                            )
+                            raise Exception(
+                                f"PDF is too small ({len(binary)} < {MINIMUM_VALID_PDF_SIZE})"
+                            )
                         logger.info(f"Uploading {pagename} ({len(binary)} B)")
 
                         @retry()
@@ -410,9 +434,25 @@ def main():
                                 description=volume_wikitext,
                                 comment=comment,
                             )
-                            assert (r or {}).get("result", {}) == "Success" or (
-                                r or {}
-                            ).get("warnings", {}).get("exists"), f"Upload failed {r}"
+                            r = r or {}
+                            if r.get("warnings", {}).get("exists"):
+                                logger.warning(
+                                    "Conflicts with existing page. Is there another worker running in parallel?"
+                                )
+                            elif dup := r.get("result", {}).get("duplicate"):
+                                assert len(dup) == 1, f"{dup}"
+                                dup = dup[0]
+                                r = page.edit(
+                                    f"#REDIRECT [[File:{dup}]]",
+                                    comment + f" (Redirecting to [[File:{dup}]])",
+                                )
+                                assert (
+                                    r.get("result", {}) == "Success"
+                                ), f"Redirection failed {r}"
+                            else:
+                                assert (
+                                    r.get("result", {}) == "Success"
+                                ), f"Upload failed {r}"
 
                         do1()
                     else:
@@ -433,6 +473,7 @@ def main():
                             do2()
                 except Exception as e:
                     failcnt += 1
+                    log_to_wiki(f"[[:{pagename}]] upload failed")
                     logger.warning("Upload failed", exc_info=e)
                     if not getopt("skip_on_failures", False):
                         raise e
@@ -509,6 +550,7 @@ def main():
             prev_filename = filename
         store_position(batch_name, book["id"])
     logger.info(f"Batch done with {failcnt} failures.")
+    log_to_wiki(f"{batch_name} finished with {failcnt} failures at.")
 
 
 if __name__ == "__main__":
