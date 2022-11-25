@@ -201,6 +201,7 @@ def main():
     watermark_tag_for_secondary = getopt("watermark_tag_for_secondary", None)
 
     def log_to_wiki(l):
+        # NOTE: possible racing condition since no sync & lock
         d = str(datetime(2022, 11, 25, 2, 21, 21, 227193, tzinfo=timezone.utc))
         page_name = config["logpage"] or f'User:{config["username"].split("@")[0]}/log'
         page = site.pages[page_name]
@@ -208,7 +209,6 @@ def main():
         if page.exists:
             wikitext = page.text()
         wikitext += f"\n* <code>{d}</code> " + l + "\n"
-        print(wikitext)
         logger.debug(f"add log to wiki: {l}")
         page.edit(wikitext, f"Log (batch:nlc; {batch_link}): {l}")
 
