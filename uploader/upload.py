@@ -449,6 +449,9 @@ def main():
                                 assert (
                                     r.get("result", {}) == "Success"
                                 ), f"Redirection failed {r}"
+                                log_to_wiki(
+                                    f"[[:{pagename}]] duplicates with the existing [[:File:{dup}]] ({len(binary)}B)"
+                                )
                             else:
                                 assert (
                                     r.get("result", {}) == "Success"
