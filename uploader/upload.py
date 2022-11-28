@@ -205,12 +205,12 @@ def main():
 
     def log_to_wiki(l):
         # NOTE: possible racing condition since no sync & lock
-        d = str(datetime(2022, 11, 25, 2, 21, 21, 227193, tzinfo=timezone.utc))
+        d = str(datetime.now(timezone.utc))
         page = site.pages[log_page_name]
         wikitext = ""
         if page.exists:
             wikitext = page.text()
-        wikitext += f"\n* <code>{d}</code> " + l + "\n"
+        wikitext += f"\n* <code>{d} - {batch_name}</code> " + l + "\n"
         logger.debug(f"add log to wiki: {l}")
         page.edit(wikitext, f"Log (batch:nlc; {batch_link}): {l}")
 
