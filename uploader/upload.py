@@ -31,7 +31,8 @@ MINIMUM_VALID_PDF_SIZE = 67
 
 # RESP_DUMP_PATH = "/tmp/wmc_upload_resp_dump.html"
 
-logging.basicConfig(level=logging.INFO)
+LOGLEVEL = os.environ.get("LOGLEVEL", "INFO").upper()
+logging.basicConfig(level=LOGLEVEL)
 logger = logging.getLogger(__name__)
 
 
@@ -68,7 +69,7 @@ def retry(times=RETRY_TIMES):
                     tried += 1
                     if tried == times:
                         raise Exception(f"Failed finally after {times} tries") from e
-                    logger.debug(f"Retrying {fn}")
+                    logger.debug(f"Retrying {fn} due to {e}", exc_info=e)
 
         return wrapped
 
@@ -436,11 +437,12 @@ def main():
                                 comment=comment,
                             )
                             r = r or {}
+                            print(r)
                             if r.get("warnings", {}).get("exists"):
                                 logger.warning(
                                     "Conflicts with existing page. Is there another worker running in parallel?"
                                 )
-                            elif dup := r.get("result", {}).get("duplicate"):
+                            elif dup := r.get("warnings", {}).get("duplicate"):
                                 assert len(dup) == 1, f"{dup}"
                                 dup = dup[0]
                                 r = page.edit(
