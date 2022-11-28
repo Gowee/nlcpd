@@ -203,7 +203,9 @@ def main():
     def log_to_wiki(l):
         # NOTE: possible racing condition since no sync & lock
         d = str(datetime(2022, 11, 25, 2, 21, 21, 227193, tzinfo=timezone.utc))
-        page_name = config["logpage"] or f'User:{config["username"].split("@")[0]}/log'
+        page_name = (
+            config.get("logpage") or f'User:{config["username"].split("@")[0]}/log'
+        )
         page = site.pages[page_name]
         wikitext = ""
         if page.exists:
