@@ -200,13 +200,12 @@ def main():
     watermark_tag = getopt("watermark_tag", False)
     watermark_tag_for_secondary = getopt("watermark_tag_for_secondary", None)
 
+    log_page_name = getopt("logpage", f'User:{config["username"].split("@")[0]}/log')
+
     def log_to_wiki(l):
         # NOTE: possible racing condition since no sync & lock
         d = str(datetime(2022, 11, 25, 2, 21, 21, 227193, tzinfo=timezone.utc))
-        page_name = (
-            config.get("logpage") or f'User:{config["username"].split("@")[0]}/log'
-        )
-        page = site.pages[page_name]
+        page = site.pages[log_page_name]
         wikitext = ""
         if page.exists:
             wikitext = page.text()
@@ -555,7 +554,7 @@ def main():
             prev_filename = filename
         store_position(batch_name, book["id"])
     logger.info(f"Batch done with {failcnt} failures.")
-    log_to_wiki(f"{batch_name} finished with {failcnt} failures at.")
+    log_to_wiki(f"{batch_name} finished with {failcnt} failures.")
 
 
 if __name__ == "__main__":
