@@ -437,7 +437,6 @@ def main():
                                 comment=comment,
                             )
                             r = r or {}
-                            print(r)
                             if r.get("warnings", {}).get("exists"):
                                 logger.warning(
                                     "Conflicts with existing page. Is there another worker running in parallel?"
