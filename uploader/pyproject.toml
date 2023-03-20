@@ -11,6 +11,8 @@ zhconv-rs = "^0.1.0-rc.6"
 PyYAML = "^6.0"
 requests = "^2.28.1"
 more-itertools = "^9.0.0"
+internetarchive = "^3.3.0"
+mwclient-contenttranslation = "^0.1.0"
 
 [tool.poetry.dev-dependencies]
 
