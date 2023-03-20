@@ -30,7 +30,6 @@ def fix_bookname_in_pagename(
 
 
 def main():
-
     with open(CONFIG_FILE_PATH, "r") as f:
         config = yaml.safe_load(f.read())
 
