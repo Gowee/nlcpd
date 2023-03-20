@@ -533,58 +533,58 @@ def main():
 
                 nth = volume["index_in_book"] + 1
                 common_fields = f"""\
-    |byline={byline}
-    |title={title}
-    {nit_field}  |volume={volume_name}
-    |abstract={abstract}
-    |toc={toc}
-    |catid={book['of_category_id']}
-    |db={volume["of_collection_name"]}
-    |dbid={dbid}
-    |bookid={book["id"]}
-    |volumenth={nth}
-    |volumetotal={len(volumes)}\
-    """
+  |byline={byline}
+  |title={title}
+{nit_field}  |volume={volume_name}
+  |abstract={abstract}
+  |toc={toc}
+  |catid={book['of_category_id']}
+  |db={volume["of_collection_name"]}
+  |dbid={dbid}
+  |bookid={book["id"]}
+  |volumenth={nth}
+  |volumetotal={len(volumes)}\
+"""
                 if secondary_task is None:
                     primary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
-    {{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={nth}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}
-    {{{{{template}
-    {common_fields}
-    |volumeid={volume["id"]}
-    {additional_fields}
-    }}}}
-    {"{{Watermark}}" if watermark_tag else ""}
+{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={nth}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}
+{{{{{template}
+{common_fields}
+  |volumeid={volume["id"]}
+{additional_fields}
+}}}}
+{"{{Watermark}}" if watermark_tag else ""}
 
-    [[{category_name}]]
-    """
+[[{category_name}]]
+"""
                     do_upload(filename, pagename, primary_volume_wikitext, comment)
                 else:
                     primary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
-    {{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|secondaryvolume={secondary_filename}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}|secondaryvolumeid={secondary_volume["id"]}}}}}
-    {{{{{template}
-    {common_fields}
-    |volumeid={volume["id"]}
-    |secondaryvolume={secondary_filename}
-    |secondaryvolumeid={secondary_volume["id"]}
-    {additional_fields}
-    }}}}
-    {"{{Watermark}}" if watermark_tag else ""}
+{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|secondaryvolume={secondary_filename}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}|secondaryvolumeid={secondary_volume["id"]}}}}}
+{{{{{template}
+{common_fields}
+  |volumeid={volume["id"]}
+  |secondaryvolume={secondary_filename}
+  |secondaryvolumeid={secondary_volume["id"]}
+{additional_fields}
+}}}}
+{"{{Watermark}}" if watermark_tag else ""}
 
-    [[{category_name}]]
-    """
+[[{category_name}]]
+"""
                     secondary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
-    {{{{{booknavi}|prev={prev_secondary_filename or ""}|next={next_secondary_filename or ""}|primaryvolume={filename}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={secondary_volume["id"]}|primaryvolumeid={volume["id"]}}}}}
-    {{{{{template}
-    {common_fields}
-    |volumeid={secondary_volume["id"]}
-    |primaryvolume={filename}
-    |primaryvolumeid={volume["id"]}
-    {additional_fields}
-    }}}}
-    {"{{Watermark}}" if watermark_tag and watermark_tag_for_secondary != False else ""}
+{{{{{booknavi}|prev={prev_secondary_filename or ""}|next={next_secondary_filename or ""}|primaryvolume={filename}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={secondary_volume["id"]}|primaryvolumeid={volume["id"]}}}}}
+{{{{{template}
+{common_fields}
+  |volumeid={secondary_volume["id"]}
+  |primaryvolume={filename}
+  |primaryvolumeid={volume["id"]}
+{additional_fields}
+}}}}
+{"{{Watermark}}" if watermark_tag and watermark_tag_for_secondary != False else ""}
 
-    [[{category_name}]]
-    """
+[[{category_name}]]
+"""
                     do_upload(
                         filename,
                         pagename,
