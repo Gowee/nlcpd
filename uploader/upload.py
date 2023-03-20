@@ -10,12 +10,16 @@ import functools
 import re
 import sys
 from itertools import chain
+from functools import lru_cache
 from datetime import datetime, timezone
 from more_itertools import peekable
+from typing import Literal
 
 import requests
 import yaml
 import mwclient
+import internetarchive as ia
+from mwclient_contenttranslation import CxTranslator
 
 from getbook import getbook
 
@@ -69,7 +73,7 @@ def retry(times=RETRY_TIMES):
                     tried += 1
                     if tried == times:
                         raise Exception(f"Failed finally after {times} tries") from e
-                    logger.debug(f"Retrying {fn} due to {e}", exc_info=e)
+                    logger.info(f"Retrying {fn} due to {e}", exc_info=e)
 
         return wrapped
 
@@ -143,14 +147,41 @@ def main():
             f"Not batch specified.\n\nAvailable: {', '.join(list(config['batchs'].keys()))}"
         )
     batch_name = sys.argv[1]
+    up2ia = len(sys.argv) >= 3 and sys.argv[2].strip() == "--ia"
 
-    username, password = config["username"], config["password"]
-    site = mwclient.Site("commons.wikimedia.org")
-    site.login(username, password)
-    site.requests["timeout"] = 125
-    site.chunk_size = 1024 * 1024 * 64
+    site: mwclient.Site = None  # to make linter happy
+    cxtrans: CxTranslator = None
+    translate_bookname_and_byline = lambda a, b: None
+    if not up2ia:
+        username, password = config["username"], config["password"]
+        site = mwclient.Site("commons.wikimedia.org")
+        site.login(username, password)
+        site.requests["timeout"] = 125
+        site.chunk_size = 1024 * 1024 * 64
+        logger.info(f"Signed in as {username} on Commons")
+    else:
+        username, password = config["username"], config["password"]
+        iausername, iapassword = config["iausername"], config["iapassword"]
+        ia.configure(iausername, iapassword, config_file="./.ia.ini")
+        logger.info(f"Uploading to IA as {username}")
+        site = mwclient.Site("zh.wikipedia.org")
+        site.login(username, password)
+        cxtrans = CxTranslator(site)
 
-    logger.info(f"Signed in as {username}")
+        @lru_cache(16)
+        def translate_bookname_and_byline(bookname, byline):
+            n, b = cxtrans.translate_text(
+                (f"《{bookname}》", f"本書由：{byline}"), "zh", "en"
+            )
+            if n.startswith('"') and n.endswith('"'):
+                n = n[1:-1]
+            if (i := b.find("by:")) != -1:
+                b = b[i + 3 :]
+            elif ":" not in bookname and "：" not in bookname and (i := b.find(":")):
+                b = b[i + 1 :]
+            elif m := re.split(r"[Bb]ook (is |was )?([a-z]+ )by"):
+                b = m[1]
+            return n.strip().title(), b.strip().title()
 
     overwriting_categories = {
         (str(item["dbid"]), str(item["bookid"])): item["catname"]
@@ -203,7 +234,18 @@ def main():
 
     log_page_name = getopt("logpage", f'User:{config["username"].split("@")[0]}/log')
 
-    def log_to_wiki(l):
+    iacollection = getopt("iacollection", "test_collection")
+    ia_subject_from_metadata_field = getopt("ia_subject_from_metadata_field", "主題")
+    ia_publisher_from_metadata_field = getopt("ia_publisher_from_metadata_field", "出版者")
+    ia_pubdate_from_metadata_field = getopt("ia_pubdate_from_metadata_field", "出版時間")
+    ia_title_pinyin_from_metadata_field = getopt(
+        "ia_title_pinyin_from_metadata_field", "拼音題名"
+    )
+    ia_abstract_from_metata_field = getopt("ia_abstract_from_metata_field", "摘要")
+
+    def log_to_remote(l):
+        if up2ia:
+            return  # TODO: no remote logging when up2ia
         # NOTE: possible racing condition since no sync & lock
         d = str(datetime.now(timezone.utc))
         page = site.pages[log_page_name]
@@ -289,273 +331,447 @@ def main():
 
         volumes = book["volumes"]
         volumes.sort(key=lambda e: e["index_in_book"])
+
+        def get_volume_name_for_filename(volume):
+            return (
+                (
+                    volume["name"]
+                    .replace("_", "–")
+                    .replace("-", "–")
+                    .replace("/", "–")
+                    .replace("\n", " ")
+                    or f"第{ivol+1}冊"
+                )
+                if (
+                    len(volumes) > 1
+                    or getopt("always_include_volume_name_in_filename", False)
+                )
+                else ""
+            )
+
         metadata = book["misc_metadata"]
         dbid = book["of_collection_name"].removeprefix("data_")
-        additional_fields = "\n".join(f"  |{k}={v}" for k, v in metadata.items())
-        if (k := (str(dbid), str(book["id"]))) in overwriting_categories:
-            category_name = "Category:" + overwriting_categories[k]
-        else:
-            category_name = "Category:" + fix_bookname_in_pagename(title)
-        category_page = site.pages[category_name]
-        # TODO: for now we do not create a seperated category suffixed with the edition
-        if not category_page.exists:
-            category_wikitext = (
-                """{{Wikidata Infobox}}
-{{Category for book|zh}}
-{{zh|%s}}
+        if not up2ia:
+            additional_fields = "\n".join(f"  |{k}={v}" for k, v in metadata.items())
+            if (k := (str(dbid), str(book["id"]))) in overwriting_categories:
+                category_name = "Category:" + overwriting_categories[k]
+            else:
+                category_name = "Category:" + fix_bookname_in_pagename(title)
+            category_page = site.pages[category_name]
+            # TODO: for now we do not create a seperated category suffixed with the edition
+            if not category_page.exists:
+                category_wikitext = (
+                    """{{Wikidata Infobox}}
+    {{Category for book|zh}}
+    {{zh|%s}}
 
-[[Category:Chinese-language books by title]]
-"""
-                % title
-            )
-            category_page.edit(
-                category_wikitext,
-                f"Creating (batch task; nlc:{book['of_collection_name']},{book['id']})",
-            )
-
-        def genvols():
-            for ivol, volume in enumerate(volumes):
-                abstract = (
-                    book["introduction"].replace("###", "@@@").replace("@@@", "\n")
+    [[Category:Chinese-language books by title]]
+    """
+                    % title
                 )
-                toc = gen_toc(volume["toc"])
-                volume_name = (
+                category_page.edit(
+                    category_wikitext,
+                    f"Creating (batch task; nlc:{book['of_collection_name']},{book['id']})",
+                )
+
+            def genvols():
+                for ivol, volume in enumerate(volumes):
+                    abstract = (
+                        book["introduction"].replace("###", "@@@").replace("@@@", "\n")
+                    )
+                    toc = gen_toc(volume["toc"])
+                    volume_name = get_volume_name_for_filename(volume)
+                    volume_name_wps = (
+                        (" " + volume_name) if volume_name else ""
+                    )  # with preceding space
+                    filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{book_name_suffix_wps}{volume_name_wps}.pdf'
+                    pagename = "File:" + filename
+                    secondary_task = None
+                    if secondary_volume := volume.get("secondary_volume"):
+                        secondary_filename = f'NLC{dbid}-{book["id"]}-{secondary_volume["id"]} {fix_bookname_in_pagename(book["name"])}{book_name_suffix_wps}{volume_name_wps}.pdf'
+                        secondary_pagename = "File:" + secondary_filename
+                        comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']},primary_to:[[{secondary_pagename}|{secondary_volume['id']}]]; {batch_link}; [[{category_name}|{title}]])"
+                        secondary_comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{secondary_volume['id']},secondary_to:[[{pagename}|{volume['id']}]]; {batch_link}; [[{category_name}|{title}]])"
+                        secondary_task = (
+                            secondary_volume,
+                            secondary_comment,
+                            secondary_filename,
+                            secondary_pagename,
+                        )
+                    else:
+                        comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[{category_name}|{title}]])"
+
+                    yield (
+                        volume,
+                        volume_name,
+                        abstract,
+                        toc,
+                        comment,
+                        filename,
+                        pagename,
+                        secondary_task,
+                    )
+
+            volsit = peekable(genvols())
+            prev_filename = None
+            prev_secondary_filename = None
+            for (
+                volume,
+                volume_name,
+                abstract,
+                toc,
+                comment,
+                filename,
+                pagename,
+                secondary_task,
+            ) in volsit:
+                try:
+                    next_filename = volsit.peek()[5]
+                except StopIteration:
+                    next_filename = None
+                if secondary_task is not None:
                     (
-                        volume["name"]
-                        .replace("_", "–")
-                        .replace("-", "–")
-                        .replace("/", "–")
-                        .replace("\n", " ")
-                        or f"第{ivol+1}冊"
-                    )
-                    if (
-                        len(volumes) > 1
-                        or getopt("always_include_volume_name_in_filename", False)
-                    )
-                    else ""
-                )
-                volume_name_wps = (
-                    (" " + volume_name) if volume_name else ""
-                )  # with preceding space
-                filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{book_name_suffix_wps}{volume_name_wps}.pdf'
-                pagename = "File:" + filename
-                secondary_task = None
-                if secondary_volume := volume.get("secondary_volume"):
-                    secondary_filename = f'NLC{dbid}-{book["id"]}-{secondary_volume["id"]} {fix_bookname_in_pagename(book["name"])}{book_name_suffix_wps}{volume_name_wps}.pdf'
-                    secondary_pagename = "File:" + secondary_filename
-                    comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']},primary_to:[[{secondary_pagename}|{secondary_volume['id']}]]; {batch_link}; [[{category_name}|{title}]])"
-                    secondary_comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{secondary_volume['id']},secondary_to:[[{pagename}|{volume['id']}]]; {batch_link}; [[{category_name}|{title}]])"
-                    secondary_task = (
                         secondary_volume,
                         secondary_comment,
                         secondary_filename,
                         secondary_pagename,
-                    )
-                else:
-                    comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']}; {batch_link}; [[{category_name}|{title}]])"
+                    ) = secondary_task
+                    try:
+                        next_secondary_task = volsit.peek()[-1]
+                        (
+                            _next_secondary_volume,
+                            _next_secondary_comment,
+                            next_secondary_filename,
+                            _next_secondary_pagename,
+                        ) = next_secondary_task
+                    except StopIteration:
+                        next_secondary_task = None
 
-                yield (
-                    volume,
-                    volume_name,
-                    abstract,
-                    toc,
-                    comment,
-                    filename,
-                    pagename,
-                    secondary_task,
-                )
-
-        volsit = peekable(genvols())
-        prev_filename = None
-        prev_secondary_filename = None
-        for (
-            volume,
-            volume_name,
-            abstract,
-            toc,
-            comment,
-            filename,
-            pagename,
-            secondary_task,
-        ) in volsit:
-            try:
-                next_filename = volsit.peek()[5]
-            except StopIteration:
-                next_filename = None
-            if secondary_task is not None:
-                (
-                    secondary_volume,
-                    secondary_comment,
-                    secondary_filename,
-                    secondary_pagename,
-                ) = secondary_task
-                try:
-                    next_secondary_task = volsit.peek()[-1]
-                    (
-                        _next_secondary_volume,
-                        _next_secondary_comment,
-                        next_secondary_filename,
-                        _next_secondary_pagename,
-                    ) = next_secondary_task
-                except StopIteration:
-                    next_secondary_task = None
-
-            def do_upload(
-                filename, pagename, volume_wikitext, comment, secondary=False
-            ):
-                nonlocal failcnt
-                assert all(char not in set(r'["$*|\]</^>@#') for char in filename)
-                page = site.pages[pagename]
-                try:
-                    if not page.exists:
-                        volume_id = (
-                            volume["id"]
-                            if not secondary
-                            else volume["secondary_volume"]["id"]
-                        )
-                        note = " (secondary)" if secondary else ""
-                        logger.info(
-                            f'Downloading {dbid},{book["id"]},{volume_id}{note}'
-                        )
-                        binary = getbook_unified(volume, secondary, nlc_proxies)
-                        # https://stackoverflow.com/a/17280876/5488616
-                        if len(binary) < MINIMUM_VALID_PDF_SIZE:
-                            log_to_wiki(
-                                f"[[:{pagename}]] is too small ({len(binary)} < {MINIMUM_VALID_PDF_SIZE}) to be well-formed"
+                def do_upload(
+                    filename, pagename, volume_wikitext, comment, secondary=False
+                ):
+                    nonlocal failcnt
+                    assert all(char not in set(r'["$*|\]</^>@#') for char in filename)
+                    page = site.pages[pagename]
+                    try:
+                        if not page.exists:
+                            volume_id = (
+                                volume["id"]
+                                if not secondary
+                                else volume["secondary_volume"]["id"]
                             )
-                            raise Exception(
-                                f"PDF is too small ({len(binary)} < {MINIMUM_VALID_PDF_SIZE})"
+                            note = " (secondary)" if secondary else ""
+                            logger.info(
+                                f'Downloading {dbid},{book["id"]},{volume_id}{note}'
                             )
-                        logger.info(f"Uploading {pagename} ({len(binary)} B)")
-
-                        @retry()
-                        def do1():
-                            r = site.upload(
-                                BytesIO(binary),
-                                filename=filename,
-                                description=volume_wikitext,
-                                comment=comment,
-                            )
-                            r = r or {}
-                            if r.get("warnings", {}).get("exists"):
-                                logger.warning(
-                                    "Conflicts with existing page. Is there another worker running in parallel?"
+                            binary = getbook_unified(volume, secondary, nlc_proxies)
+                            # https://stackoverflow.com/a/17280876/5488616
+                            if len(binary) < MINIMUM_VALID_PDF_SIZE:
+                                log_to_remote(
+                                    f"[[:{pagename}]] is too small ({len(binary)} < {MINIMUM_VALID_PDF_SIZE}) to be well-formed"
                                 )
-                            elif dup := r.get("warnings", {}).get("duplicate"):
-                                assert len(dup) == 1, f"{dup}"
-                                dup = dup[0]
-                                r = page.edit(
-                                    f"#REDIRECT [[File:{dup}]]",
-                                    comment + f" (Redirecting to [[File:{dup}]])",
+                                raise Exception(
+                                    f"PDF is too small ({len(binary)} < {MINIMUM_VALID_PDF_SIZE})"
                                 )
-                                assert (
-                                    r.get("result", {}) == "Success"
-                                ), f"Redirection failed {r}"
-                                log_to_wiki(
-                                    f"[[:{pagename}]] duplicates with the existing [[:File:{dup}]] ({len(binary)}B)"
-                                )
-                            else:
-                                assert (
-                                    r.get("result", {}) == "Success"
-                                ), f"Upload failed {r}"
-
-                        do1()
-                    else:
-                        if getopt("skip_on_existing", False):
-                            logger.debug(f"{pagename} exists, skipping")
-                        else:
-                            logger.info(f"{pagename} exists, updating wikitext")
+                            logger.info(f"Uploading {pagename} ({len(binary)} B)")
 
                             @retry()
-                            def do2():
-                                r = page.edit(
-                                    volume_wikitext, comment + " (Updating metadata)"
+                            def do1():
+                                r = site.upload(
+                                    BytesIO(binary),
+                                    filename=filename,
+                                    description=volume_wikitext,
+                                    comment=comment,
                                 )
-                                assert (r or {}).get(
-                                    "result", {}
-                                ) == "Success", f"Update failed {r}"
+                                r = r or {}
+                                if r.get("warnings", {}).get("exists"):
+                                    logger.warning(
+                                        "Conflicts with existing page. Is there another worker running in parallel?"
+                                    )
+                                elif dup := r.get("warnings", {}).get("duplicate"):
+                                    assert len(dup) == 1, f"{dup}"
+                                    dup = dup[0]
+                                    r = page.edit(
+                                        f"#REDIRECT [[File:{dup}]]",
+                                        comment + f" (Redirecting to [[File:{dup}]])",
+                                    )
+                                    assert (
+                                        r.get("result", {}) == "Success"
+                                    ), f"Redirection failed {r}"
+                                    log_to_remote(
+                                        f"[[:{pagename}]] duplicates with the existing [[:File:{dup}]] ({len(binary)}B)"
+                                    )
+                                else:
+                                    assert (
+                                        r.get("result", {}) == "Success"
+                                    ), f"Upload failed {r}"
 
-                            do2()
+                            do1()
+                        else:
+                            if getopt("skip_on_existing", False):
+                                logger.debug(f"{pagename} exists, skipping")
+                            else:
+                                logger.info(f"{pagename} exists, updating wikitext")
+
+                                @retry()
+                                def do2():
+                                    r = page.edit(
+                                        volume_wikitext,
+                                        comment + " (Updating metadata)",
+                                    )
+                                    assert (r or {}).get(
+                                        "result", {}
+                                    ) == "Success", f"Update failed {r}"
+
+                                do2()
+                    except Exception as e:
+                        failcnt += 1
+                        log_to_remote(f"[[:{pagename}]] upload failed")
+                        logger.warning("Upload failed", exc_info=e)
+                        if not getopt("skip_on_failures", False):
+                            raise e
+
+                nth = volume["index_in_book"] + 1
+                common_fields = f"""\
+    |byline={byline}
+    |title={title}
+    {nit_field}  |volume={volume_name}
+    |abstract={abstract}
+    |toc={toc}
+    |catid={book['of_category_id']}
+    |db={volume["of_collection_name"]}
+    |dbid={dbid}
+    |bookid={book["id"]}
+    |volumenth={nth}
+    |volumetotal={len(volumes)}\
+    """
+                if secondary_task is None:
+                    primary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
+    {{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={nth}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}
+    {{{{{template}
+    {common_fields}
+    |volumeid={volume["id"]}
+    {additional_fields}
+    }}}}
+    {"{{Watermark}}" if watermark_tag else ""}
+
+    [[{category_name}]]
+    """
+                    do_upload(filename, pagename, primary_volume_wikitext, comment)
+                else:
+                    primary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
+    {{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|secondaryvolume={secondary_filename}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}|secondaryvolumeid={secondary_volume["id"]}}}}}
+    {{{{{template}
+    {common_fields}
+    |volumeid={volume["id"]}
+    |secondaryvolume={secondary_filename}
+    |secondaryvolumeid={secondary_volume["id"]}
+    {additional_fields}
+    }}}}
+    {"{{Watermark}}" if watermark_tag else ""}
+
+    [[{category_name}]]
+    """
+                    secondary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
+    {{{{{booknavi}|prev={prev_secondary_filename or ""}|next={next_secondary_filename or ""}|primaryvolume={filename}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={secondary_volume["id"]}|primaryvolumeid={volume["id"]}}}}}
+    {{{{{template}
+    {common_fields}
+    |volumeid={secondary_volume["id"]}
+    |primaryvolume={filename}
+    |primaryvolumeid={volume["id"]}
+    {additional_fields}
+    }}}}
+    {"{{Watermark}}" if watermark_tag and watermark_tag_for_secondary != False else ""}
+
+    [[{category_name}]]
+    """
+                    do_upload(
+                        filename,
+                        pagename,
+                        primary_volume_wikitext,
+                        comment,
+                        secondary=False,
+                    )
+                    do_upload(
+                        secondary_filename,
+                        secondary_pagename,
+                        secondary_volume_wikitext,
+                        secondary_comment,
+                        secondary=True,
+                    )
+                prev_secondary_filename = filename
+                prev_filename = filename
+        else:  # up2ia
+            identifier = f"nlc{dbid}-{book['id']}"
+            description = []
+            if abstract := metadata.get(
+                ia_abstract_from_metata_field, book["introduction"] or None
+            ):  # but book['introduction'] always empty?
+                abstract = abstract.replace("###", "@@@").replace("@@@", "\n")
+                description.append(f'<section id="abstract">{abstract}</section>')
+            if len(book["volumes"]) > 1:
+                sections = []
+                for ivol, volume in enumerate(volumes):
+                    volume_name = volume["name"]
+                    lines = []
+                    if volume["toc"]:
+                        for line in volume["toc"]:
+                            lines.append(
+                                f'<li><span class="chapter-no">{line[0]}</span>&nbsp;<span class="chapter-title">{line[1]}</span></li>'
+                            )
+                    sections.append(
+                        f'<li data-volume-name="{volume_name}"><h4>{volume_name}</h4><ol class="chapter-list" style="list-style: inherit; padding-left: 0.5em;">'
+                        + "".join(lines)
+                        + "</ol></li>"
+                    )
+                toc = (
+                    '<ol style="list-style: none; padding-left: 0;">'
+                    + "".join(sections)
+                    + "</ol>"
+                )
+            else:
+                volume_name = volumes[0]["name"]
+                lines = []
+                for line in volumes[0]["toc"]:
+                    lines.append(
+                        f'<li><span class="chapter-no">{line[0]}</span><span class="chapter-title">{line[1]}</span></li>'
+                    )
+                toc = (
+                    f'<ol class="chapter-list" data-volume-name="{volume_name}" style="list-style: none; padding-left: 0.5em;">  '
+                    + "  ".join(lines)
+                    + "</ol>"
+                )
+            if toc:
+                toc = '<section id="toc"><h3>目錄 / ToC</h3>' + toc + "</section>"
+            description.append(toc)
+            description = "\n".join(description)
+            # print(description)
+            title_alt, creator_alt = translate_bookname_and_byline(
+                fix_bookname_in_pagename(book["name"]), byline
+            )
+            if pinyin := metadata.get(ia_title_pinyin_from_metadata_field):
+                title_alt += f" ({pinyin})"
+            creator_alt = re.sub(r"\s*(<br>\s*(</br>)?|<br\s*/>)\s*", "\n", creator_alt)
+            iametadata = {
+                "collection": [
+                    iacollection,
+                    "community",  # default collection
+                ],
+                "mediatype": "texts",
+                "title": fix_bookname_in_pagename(book["name"]) + book_name_suffix_wps,
+                "title-alt-script": title_alt,
+                "creator": re.sub(r"<br ?/>\n", "\n", byline),
+                "creator-alt-script": creator_alt,
+                "publisher": metadata.get(ia_publisher_from_metadata_field),
+                "date": metadata.get(ia_pubdate_from_metadata_field),
+                "language": "Chinese (Traditional)",
+                "contributor": "National Library of China",
+                "subject": metadata.get(ia_subject_from_metadata_field),
+                "identifier-bib": identifier,  # ?
+                "scanner": f"nlcpdbot/0.0 via Internet Archive Python library {ia.__version__}",
+                "source": f"http://read.nlc.cn/allSearch/searchDetail?searchType=&showType=1&indexName={book['of_collection_name']}&fid={book['id']}",
+                "description": description,
+            }
+            existing_item = None
+            try:
+                existing_item = next(
+                    iter(
+                        ia.search_items("identifier-bib:" + identifier).iter_as_items()
+                    )
+                )
+            except StopIteration:
+                pass
+            if existing_item:
+                assert existing_item.metadata["identifier-bib"] == identifier
+                logger.info(
+                    f"Updating metadata for {identifier} (IA: {existing_item.identifier})"
+                )
+                r = existing_item.modify_metadata(existing_item.metadata | iametadata)
+                if r.status_code != 200:
+                    logger.warning(
+                        f"Failed to update metadata for {identifier}: "
+                        + r.content.decode("utf-8")
+                    )
+                existing_item.filemap = {
+                    f["identifier-bib"]: f
+                    for f in existing_item.files
+                    if f["source"] == "original" and "identifier-bib" in f
+                } | {
+                    f["name"]: f
+                    for f in existing_item.files
+                    if f["source"] == "original"
+                }
+
+            for ivol, volume in enumerate(volumes):
+                volume_identifier = f'nlc{dbid}-{book["id"]}-{volume["id"]}'
+                if f := (
+                    existing_item and existing_item.filemap.get(volume_identifier)
+                ):
+                    logger.debug(
+                        f"{volume_identifier} exists in {identifier} as {f['title']}"
+                    )
+                    continue
+                volume_name = get_volume_name_for_filename(volume)
+                volume_name_wps = (
+                    (" " + volume_name) if volume_name else ""
+                )  # with preceding space
+                filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{book_name_suffix_wps}{volume_name_wps}.pdf'
+                if f := (existing_item and existing_item.filemap.get(filename)):
+                    logger.debug(f"{f['title']} exists in {identifier}")
+                    continue
+                iafilemetadata = {
+                    "title": volume_name or None,
+                    # actually, not a speciaal field in file metadata
+                    "identifier-bib": volume_identifier,
+                    "track": f"{ivol + 1}/{len(volumes)}",
+                    # "comment": gen_toc(volume["toc"]),
+                }
+
+                @retry()
+                def do_upload():
+                    logger.info(
+                        f'Downloading {dbid},{book["id"]},{volume["id"]} ({ivol + 1}/{len(volumes)})'
+                    )
+                    binary = getbook_unified(volume)
+                    # https://stackoverflow.com/a/17280876/5488616
+                    if len(binary) < MINIMUM_VALID_PDF_SIZE:
+                        log_to_remote(
+                            f"[[:{pagename}]] is too small ({len(binary)} < {MINIMUM_VALID_PDF_SIZE}) to be well-formed"
+                        )
+                        raise Exception(
+                            f"PDF is too small ({len(binary)} < {MINIMUM_VALID_PDF_SIZE})"
+                        )
+
+                    logger.info(
+                        f"Uploading {filename} as {volume_name or 'the only volume'} to {identifier} ({len(binary)} B)"
+                    )
+                    r = ia.upload(
+                        identifier,
+                        [
+                            {
+                                "name": [filename, BytesIO(binary)],
+                            }
+                            | iafilemetadata
+                        ],
+                        metadata=iametadata,
+                    )[0]
+                    if r.status_code != 200 or r.json().get("success") != True:
+                        logger.warning(
+                            f"HTTP error {r.status_code} when uploading: {r.content}"
+                        )
+                        raise Exception(f"HTTP error {r.status_code} when uploading")
+
+                try:
+                    do_upload()
                 except Exception as e:
                     failcnt += 1
-                    log_to_wiki(f"[[:{pagename}]] upload failed")
+                    log_to_remote(f"[[:{pagename}]] upload failed")  # TODO: <-
                     logger.warning("Upload failed", exc_info=e)
                     if not getopt("skip_on_failures", False):
                         raise e
-
-            nth = volume["index_in_book"] + 1
-            common_fields = f"""\
-  |byline={byline}
-  |title={title}
-{nit_field}  |volume={volume_name}
-  |abstract={abstract}
-  |toc={toc}
-  |catid={book['of_category_id']}
-  |db={volume["of_collection_name"]}
-  |dbid={dbid}
-  |bookid={book["id"]}
-  |volumenth={nth}
-  |volumetotal={len(volumes)}\
-"""
-            if secondary_task is None:
-                primary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
-{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={nth}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}
-{{{{{template}
-{common_fields}
-  |volumeid={volume["id"]}
-{additional_fields}
-}}}}
-{"{{Watermark}}" if watermark_tag else ""}
-
-[[{category_name}]]
-"""
-                do_upload(filename, pagename, primary_volume_wikitext, comment)
-            else:
-                primary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
-{{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|secondaryvolume={secondary_filename}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}|secondaryvolumeid={secondary_volume["id"]}}}}}
-{{{{{template}
-{common_fields}
-  |volumeid={volume["id"]}
-  |secondaryvolume={secondary_filename}
-  |secondaryvolumeid={secondary_volume["id"]}
-{additional_fields}
-}}}}
-{"{{Watermark}}" if watermark_tag else ""}
-
-[[{category_name}]]
-"""
-                secondary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
-{{{{{booknavi}|prev={prev_secondary_filename or ""}|next={next_secondary_filename or ""}|primaryvolume={filename}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={secondary_volume["id"]}|primaryvolumeid={volume["id"]}}}}}
-{{{{{template}
-{common_fields}
-  |volumeid={secondary_volume["id"]}
-  |primaryvolume={filename}
-  |primaryvolumeid={volume["id"]}
-{additional_fields}
-}}}}
-{"{{Watermark}}" if watermark_tag and watermark_tag_for_secondary != False else ""}
-
-[[{category_name}]]
-"""
-                do_upload(
-                    filename,
-                    pagename,
-                    primary_volume_wikitext,
-                    comment,
-                    secondary=False,
-                )
-                do_upload(
-                    secondary_filename,
-                    secondary_pagename,
-                    secondary_volume_wikitext,
-                    secondary_comment,
-                    secondary=True,
-                )
-            prev_secondary_filename = filename
-            prev_filename = filename
         store_position(batch_name, book["id"])
     logger.info(f"Batch done with {failcnt} failures.")
-    log_to_wiki(f"{batch_name} finished with {failcnt} failures.")
+    log_to_remote(f"{batch_name} finished with {failcnt} failures.")
 
 
 if __name__ == "__main__":
