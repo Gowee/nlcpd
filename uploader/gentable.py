@@ -30,7 +30,6 @@ def fix_bookname_in_pagename(
 
 
 def main():
-
     with open(CONFIG_FILE_PATH, "r") as f:
         config = yaml.safe_load(f.read())
 
@@ -78,7 +77,7 @@ def main():
         book["name"] = book["name"].replace("@@@", " ")
         if '"' in (
             author := book["misc_metadata"].get(
-                "責任者", book["misc_metadata"].get("责任者"), ""
+                "責任者", book["misc_metadata"].get("责任者", "")
             )
         ):
             book["author"] = author.replace("   ", " ")
