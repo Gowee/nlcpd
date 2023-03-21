@@ -106,11 +106,19 @@ def getbook_unified(volume, secondary=False, proxies=None):
 def split_name_heuristic(name):
     if name.endswith("不分卷"):
         return name[:-3], "不分卷"
-    match = re.match(r"^(\S+?)\s*([一二三四五六七八九十]+[卷冊册])$", name)
+    match = re.match(r"^(\S+?)\s*([一二三四五六七八九十百]+[卷冊册])$", name)
     if match is None:
         return name, ""
     else:
         return match.group(1), match.group(2)
+
+
+def split_name_more(name):
+    if name.endswith("不分卷"):
+        return name[:-3], "不分卷"
+    match = re.match(r"^(\S+)( \S+[册冊卷])*", name)
+    assert match, "Invalid Book Title"
+    return name[: match.end(1)], name[match.end(1) + 1 :]
 
 
 def split_name_simple(name):
@@ -211,6 +219,8 @@ def main():
         split_name = split_name_simple
     elif getopt("split_name", "").lower() == "heuristic":
         split_name = split_name_heuristic
+    elif getopt("split_name", "").lower() == "more":
+        split_name = split_name_more
     else:
         split_name = lambda s: (s, "")
 
@@ -308,7 +318,9 @@ def main():
         byline = byline.replace("\uf8ff", ",")
         if byline_enclosing_brackets:
             byline = "[" + byline + "]"
-        title, note_in_title = split_name(book["name"].replace("?", "□"))
+        title, note_in_title = split_name(
+            book["name"].replace("?", "□").replace("○", "〇")
+        )
         title = re.sub(r"\s+", " ", title)
         note_in_title = re.sub(r"\s+", " ", note_in_title)
         if getopt("split_name", None) is not None:
@@ -362,11 +374,11 @@ def main():
             if not category_page.exists:
                 category_wikitext = (
                     """{{Wikidata Infobox}}
-    {{Category for book|zh}}
-    {{zh|%s}}
+{{Category for book|zh}}
+{{zh|%s}}
 
-    [[Category:Chinese-language books by title]]
-    """
+[[Category:Chinese-language books by title]]
+"""
                     % title
                 )
                 category_page.edit(
