@@ -251,7 +251,8 @@ def main():
     ia_title_pinyin_from_metadata_field = getopt(
         "ia_title_pinyin_from_metadata_field", "拼音題名"
     )
-    ia_abstract_from_metata_field = getopt("ia_abstract_from_metata_field", "摘要")
+    abstract_from_metadata_field = getopt("abstract_from_metadata_field", "摘要")
+    assert not (metadata.get(abstract_from_metadata_field) and book["introduction"])
 
     def log_to_remote(l):
         if up2ia:
@@ -388,8 +389,10 @@ def main():
 
             def genvols():
                 for ivol, volume in enumerate(volumes):
-                    abstract = (
+                    abstract = metadata.get(
+                        abstract_from_metadata_field,
                         book["introduction"].replace("###", "@@@").replace("@@@", "\n")
+                        or None,
                     )
                     toc = gen_toc(volume["toc"])
                     volume_name = get_volume_name_for_filename(volume)
@@ -617,7 +620,7 @@ def main():
             identifier = f"nlc{dbid}-{book['id']}"
             description = []
             if abstract := metadata.get(
-                ia_abstract_from_metata_field, book["introduction"] or None
+                abstract_from_metadata_field, book["introduction"] or None
             ):  # but book['introduction'] always empty?
                 abstract = abstract.replace("###", "@@@").replace("@@@", "\n")
                 description.append(f'<section id="abstract">{abstract}</section>')
