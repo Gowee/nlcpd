@@ -252,8 +252,7 @@ def main():
         "ia_title_pinyin_from_metadata_field", "拼音題名"
     )
     abstract_from_metadata_field = getopt("abstract_from_metadata_field", "摘要")
-    assert not (metadata.get(abstract_from_metadata_field) and book["introduction"])
-
+    
     def log_to_remote(l):
         if up2ia:
             return  # TODO: no remote logging when up2ia
@@ -335,6 +334,8 @@ def main():
             # if getopt("apply_gbt3792_7_brackets_to_title", False):
             #     title = "[" + title + "]"
             # http://www.nlc.cn/pcab/gjbhzs/bm/201412/P020150309516939790893.pdf §8.1.4, §8.1.6
+
+        assert not (book['misc_metadata'].get(abstract_from_metadata_field) and book["introduction"])
 
         book_name_suffix_wps = ""
         if should_use_pubdate_as_suffix(book["name"]) and (
