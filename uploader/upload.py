@@ -12,6 +12,7 @@ import sys
 from itertools import chain
 from functools import lru_cache
 from datetime import datetime, timezone
+from unicodedata import name
 from more_itertools import peekable
 from typing import Literal
 
@@ -26,6 +27,7 @@ from getbook import getbook
 CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.yml")
 POSITION_FILE_PATH = os.path.join(os.path.dirname(__file__), ".position")
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+NAME_CAP_FIX_PATH = os.path.join(DATA_DIR, "namecapfix.yml")
 RETRY_TIMES = 3
 
 USER_AGENT = "nlcpdbot/0.0 (+https://github.com/gowee/nlcpd)"
@@ -224,6 +226,12 @@ def main():
     else:
         split_name = lambda s: (s, "")
 
+    with open(NAME_CAP_FIX_PATH, "r") as f:
+        name_fixes = yaml.safe_load(f.read())
+    name_fixes = {
+        (str(entry["dbid"]), str(entry["bookid"])): entry for entry in name_fixes
+    }
+
     booknavi = getopt("booknavi", "BookNaviBar2")
 
     if pubdate_as_suffix := getopt("pubdate_as_suffix"):
@@ -252,7 +260,7 @@ def main():
         "ia_title_pinyin_from_metadata_field", "拼音題名"
     )
     abstract_from_metadata_field = getopt("abstract_from_metadata_field", "摘要")
-    
+
     def log_to_remote(l):
         if up2ia:
             return  # TODO: no remote logging when up2ia
@@ -335,7 +343,19 @@ def main():
             #     title = "[" + title + "]"
             # http://www.nlc.cn/pcab/gjbhzs/bm/201412/P020150309516939790893.pdf §8.1.4, §8.1.6
 
-        assert not (book['misc_metadata'].get(abstract_from_metadata_field) and book["introduction"])
+        assert not (
+            book["misc_metadata"].get(abstract_from_metadata_field)
+            and book["introduction"]
+        )
+
+        dbid = book["of_collection_name"].removeprefix("data_")
+
+        capping = name_fixes.get((str(dbid), str(book["id"])))
+        book_name_capped = capping["name"] if capping else book["name"]
+        cap_category_name = bool(capping) and capping.get("cap_category_name", False)
+        shorten_volume_name = bool(capping) and capping.get(
+            "shorten_volume_name", False
+        )
 
         book_name_suffix_wps = ""
         if should_use_pubdate_as_suffix(book["name"]) and (
@@ -347,27 +367,33 @@ def main():
         volumes.sort(key=lambda e: e["index_in_book"])
 
         def get_volume_name_for_filename(volume):
+            if not (
+                len(volumes) > 1
+                or getopt("always_include_volume_name_in_filename", False)
+            ):
+                return ""
+            if shorten_volume_name:
+                assert not volume["name"] or re.match(
+                    r"^第\d+[册冊卷]$", volume["name"]
+                ), volume["name"]
+                return str(volume["index_in_book"] + 1)
             return (
-                (
-                    volume["name"]
-                    .replace("_", "–")
-                    .replace("-", "–")
-                    .replace("/", "–")
-                    .replace("\n", " ")
-                    or f"第{ivol+1}冊"
-                )
-                if (
-                    len(volumes) > 1
-                    or getopt("always_include_volume_name_in_filename", False)
-                )
-                else ""
+                volume["name"]
+                .replace("_", "–")
+                .replace("-", "–")
+                .replace("/", "–")
+                .replace("\n", " ")
+                or f"第{volume['index_in_book'] + 1}冊"
             )
 
         metadata = book["misc_metadata"]
-        dbid = book["of_collection_name"].removeprefix("data_")
         if not up2ia:
             additional_fields = "\n".join(f"  |{k}={v}" for k, v in metadata.items())
-            if (k := (str(dbid), str(book["id"]))) in overwriting_categories:
+            if cap_category_name:
+                category_name = (
+                    "Category:" + book_name_capped
+                )  # Does not handle for nit for now
+            elif (k := (str(dbid), str(book["id"]))) in overwriting_categories:
                 category_name = "Category:" + overwriting_categories[k]
             else:
                 category_name = "Category:" + fix_bookname_in_pagename(title)
@@ -400,11 +426,11 @@ def main():
                     volume_name_wps = (
                         (" " + volume_name) if volume_name else ""
                     )  # with preceding space
-                    filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{book_name_suffix_wps}{volume_name_wps}.pdf'
+                    filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book_name_capped)}{book_name_suffix_wps}{volume_name_wps}.pdf'
                     pagename = "File:" + filename
                     secondary_task = None
                     if secondary_volume := volume.get("secondary_volume"):
-                        secondary_filename = f'NLC{dbid}-{book["id"]}-{secondary_volume["id"]} {fix_bookname_in_pagename(book["name"])}{book_name_suffix_wps}{volume_name_wps}.pdf'
+                        secondary_filename = f'NLC{dbid}-{book["id"]}-{secondary_volume["id"]} {fix_bookname_in_pagename(book_name_capped)}{book_name_suffix_wps}{volume_name_wps}.pdf'
                         secondary_pagename = "File:" + secondary_filename
                         comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{volume['id']},primary_to:[[{secondary_pagename}|{secondary_volume['id']}]]; {batch_link}; [[{category_name}|{title}]])"
                         secondary_comment = f"Upload {book['name']}{volume_name_wps} ({1+ivol}/{len(volumes)}) by {book['author']} (batch task; nlc:{book['of_collection_name']},{book['id']},{secondary_volume['id']},secondary_to:[[{pagename}|{volume['id']}]]; {batch_link}; [[{category_name}|{title}]])"

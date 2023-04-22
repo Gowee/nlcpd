@@ -10,6 +10,7 @@ import mwclient
 
 CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.yml")
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+NAME_CAP_FIX_PATH = os.path.join(DATA_DIR, "namecapfix.yml")
 
 
 def fix_bookname_in_pagename(
@@ -27,6 +28,9 @@ def fix_bookname_in_pagename(
         "?", "□"
     )  # WHITE SQUARE, U+25A1, for, e.g. 892 312001039388 筠清?金石文字   五卷"
     return bookname
+
+
+# TODO: implement secondary_volume support
 
 
 def main():
@@ -54,6 +58,12 @@ def main():
             "apply_tortoise_shell_brackets_to_starting_of_title", False
         ),
     )
+
+    with open(NAME_CAP_FIX_PATH, "r") as f:
+        name_fixes = yaml.safe_load(f.read())
+    name_fixes = {
+        (str(entry["dbid"]), str(entry["bookid"])): entry for entry in name_fixes
+    }
 
     # if pubdate_as_suffix := getopt("pubdate_as_suffix"):
     #     pubdate_as_suffix["incl"] = re.compile(pubdate_as_suffix["incl"])
@@ -90,6 +100,14 @@ def main():
         book["name"] = book["name"].replace("@@@", " ")
         book["author"] = book["author"].replace("@@@", " ")
         dbid = book["of_collection_name"].removeprefix("data_")
+
+        capping = name_fixes.get((str(dbid), str(book["id"])))
+        book_name_capped = capping["name"] if capping else book["name"]
+        # cap_category_name = bool(capping) and capping.get("cap_category_name", False)
+        shorten_volume_name = bool(capping) and capping.get(
+            "shorten_volume_name", False
+        )
+
         # lines.append(
         #     f'| 《{book["name"]}》 {book["author"]} {{{{NLC-Book-Link|{dbid}|{book["id"]}|catid={book["of_category_id"]}}}}}'
         # )
@@ -104,25 +122,30 @@ def main():
         if len(volumes) > 1:
             rowspan = f'rowspan="{len(volumes)}" | '
         for ivol, volume in enumerate(volumes):
-            volume_name = (
-                (
+            if not (
+                len(volumes) > 1
+                or getopt("always_include_volume_name_in_filename", False)
+            ):
+                volume_name = ""
+            elif shorten_volume_name:
+                assert not volume["name"] or re.match(
+                    r"^第\d+[册冊卷]$", volume["name"]
+                ), volume["name"]
+                volume_name = str(volume["index_in_book"] + 1)
+            else:
+                volume_name = (
                     volume["name"]
                     .replace("_", "–")
                     .replace("-", "–")
                     .replace("/", "–")
                     .replace("\n", " ")
-                    or f"第{ivol+1}冊"
+                    or f"第{volume['index_in_book'] + 1}冊"
                 )
-                if (
-                    len(volumes) > 1
-                    or getopt("always_include_volume_name_in_filename", False)
-                )
-                else ""
-            )
+
             volume_name_wps = (
                 (" " + volume_name) if volume_name else ""
             )  # with preceding space
-            filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book["name"])}{book_name_suffix_wps}{volume_name_wps}.pdf'
+            filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book_name_capped)}{book_name_suffix_wps}{volume_name_wps}.pdf'
             pagename = "File:" + filename
             # if secondary_volume := volume.get("secondary_volume"):
             #     secondary_filename = f'NLC{dbid}-{book["id"]}-{secondary_volume["id"]} {fix_bookname_in_pagename(book["name"])}{book_name_suffix_wps}{volume_name_wps}.pdf'
