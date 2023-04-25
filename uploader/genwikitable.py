@@ -154,8 +154,8 @@ def main():
             # else:
             #     lines.append(f"** [[:{pagename}]]")
             if ivol == 0:
-                assert re.sub(r"(\s|#)+", " ", book["author"].strip()) == re.sub(
-                    r"\s+",
+                assert re.sub(r"(\s|#|@)+", " ", book["author"].strip()) == re.sub(
+                    r"(\s|#|@)+",  # .e.g NLC511-027032016010287
                     " ",
                     book["misc_metadata"]
                     .get("責任者", book["misc_metadata"].get("责任者", ""))
