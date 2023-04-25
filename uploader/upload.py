@@ -578,8 +578,8 @@ def main():
   |byline={byline}
   |title={title}
 {nit_field}  |volume={volume_name}
-  |abstract={abstract}
-  |toc={toc}
+  |abstract={abstract or ""}
+  |toc={toc or ""}
   |catid={book['of_category_id']}
   |db={volume["of_collection_name"]}
   |dbid={dbid}
@@ -599,6 +599,7 @@ def main():
 
 [[{category_name}]]
 """
+
                     do_upload(filename, pagename, primary_volume_wikitext, comment)
                 else:
                     primary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
