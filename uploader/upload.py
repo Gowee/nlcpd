@@ -146,7 +146,6 @@ def fix_bookname_in_pagename(
         "○", "〇"
     )  # WHITE SQUARE, U+25A1, for, e.g. 892 312001039388 筠清?金石文字   五卷"
     bookname = re.sub(r'"([^"]+)"', r"“\1”", bookname)  # e.g. NLC-511-09000049
-    print(bookname)
     return bookname
 
 
@@ -540,15 +539,16 @@ def main():
                                         comment + f" (Redirecting to [[File:{dup}]])",
                                     )
                                     assert (
-                                        r.get("result", {}) == "Success"
+                                        r.get("result") == "Success"
                                     ), f"Redirection failed {r}"
                                     log_to_remote(
                                         f"[[:{pagename}]] duplicates with the existing [[:File:{dup}]] ({len(binary)}B)"
                                     )
                                 else:
                                     assert (
-                                        r.get("result", {}) == "Success"
-                                    ), f"Upload failed {r}"
+                                        r.get("result")
+                                        or r.get("upload", {}).get("result")
+                                    ) == "Success", f"Upload failed {r}"
 
                             do1()
                         else:
