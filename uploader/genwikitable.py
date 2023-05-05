@@ -163,7 +163,7 @@ def main():
                     .strip(),
                 ), f"""{repr(book['author'])} != {repr(book['misc_metadata'].get("責任者", book['misc_metadata'].get("责任者", "")))} for NLC{dbid}-{book['id']}"""
                 lines.append(
-                    f"""| [[:{pagename}]] || {rowspan}{book['name']} {{{{NLC-Book-Link|{dbid}|{book["id"]}|catid={book["of_category_id"]}}}}} || {rowspan}{book['author']} || {rowspan}{book['misc_metadata'].get('出版時間', book['misc_metadata'].get('出版时间', ''))} || {rowspan}{book['misc_metadata'].get('出版者', '')}
+                    f"""| [[:{pagename}]] || {rowspan}{book['name']} {{{{NLC-Book-Link|{dbid}|{book["id"]}|catid={book["of_category_id"]}}}}} || {rowspan}{book['author']} || {rowspan}{book['misc_metadata'].get('出版時間', book['misc_metadata'].get('出版时间', book['misc_metadata'].get('出版年', '')))} || {rowspan}{book['misc_metadata'].get('出版者', '')}
 |-"""
                 )
             else:
