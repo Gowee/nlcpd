@@ -121,7 +121,7 @@ def split_name_more(name):
     # match = re.match(r"^(\S+)( \S+[册冊卷])*", name)
     match = re.match(r"^(?P<a>\S+)( [(（](?P<b>\S+[册冊卷])?[)）]?)?$", name)
     assert match, "Invalid Book Title"
-    return match.groups("a"), match.groups("b") or ""
+    return match.group("a"), match.group("b") or ""
 
 
 def split_name_simple(name):
