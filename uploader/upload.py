@@ -119,7 +119,7 @@ def split_name_more(name):
     if name.endswith("不分卷"):
         return name[:-3], "不分卷"
     # match = re.match(r"^(\S+)( \S+[册冊卷])*", name)
-    match = re.match(r"^(?P<a>\S+) [(（](?P<b>\S+[册冊卷])?[)）]?$", name)
+    match = re.match(r"^(?P<a>\S+)( [(（](?P<b>\S+[册冊卷])?[)）]?)?$", name)
     assert match, "Invalid Book Title"
     return match.groups("a"), match.groups("b") or ""
 
