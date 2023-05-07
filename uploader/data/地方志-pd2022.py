@@ -20,6 +20,10 @@ def main():
             book["misc_metadata"].get("出版年", ""),
         ):
             return False
+        if str(book["id"]) in (
+            "043021505010016"  # collections of works by natural persons
+        ):
+            return False
         return True
 
     origcnt = len(books)
