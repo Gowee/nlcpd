@@ -100,8 +100,16 @@ def getbook_unified(volume, secondary=False, proxies=None):
     logger.debug(f"Fetching {volume}")
     # if "fileiplogger.info("Failed to get file by path: " + str(e), ", fallbacking to getbook")
     volume_id = volume["id"] if not secondary else volume["secondary_volume"]["id"]
+    file_path = (
+        volume["file_path"]
+        if not secondary
+        else volume["secondary_volume"]["file_path"]
+    )
     return getbook(
-        volume["of_collection_name"].removeprefix("data_"), volume_id, proxies
+        volume["of_collection_name"].removeprefix("data_"),
+        volume_id,
+        file_path,
+        proxies,
     )
 
 
