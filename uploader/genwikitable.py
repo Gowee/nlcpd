@@ -24,8 +24,8 @@ def fix_bookname_in_pagename(
     bookname = re.sub(r"\[(.+?)\]", r"\1", bookname)
     bookname = bookname.replace(":", "：")  # e.g. 404 00J001624 綠洲:中英文藝綜合月刊
     bookname = re.sub(r"\s+", " ", bookname)
-    bookname = bookname.replace(
-        "?", "□"
+    bookname = bookname.replace("?", "□").replace(
+        "○", "〇"
     )  # WHITE SQUARE, U+25A1, for, e.g. 892 312001039388 筠清?金石文字   五卷"
     bookname = re.sub(r'"([^"]+)"', r"“(\1)”", bookname)  # e.g. NLC-511-09000049
     return bookname
