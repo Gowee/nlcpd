@@ -16,7 +16,7 @@ def main():
 
     def f(book):
         if re.search(
-            r"19[01][0-9]|192[0-6]|1[0-8][0-9][0-9]",
+            r"19[01][0-9]|192[0-8]|1[0-8][0-9][0-9]",
             book["misc_metadata"].get("出版時間", ""),
         ):
             return True
