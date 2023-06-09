@@ -23,6 +23,7 @@ def fix_bookname_in_pagename(
         bookname = re.sub(r"\[(.+?)\]", r"〔\1〕", bookname)  # [宋]...
     bookname = re.sub(r"\[(.+?)\]", r"\1", bookname)
     bookname = bookname.replace(":", "：")  # e.g. 404 00J001624 綠洲:中英文藝綜合月刊
+    bookname = bookname.replace("###", " ").replace("@@@", " ")
     bookname = re.sub(r"\s+", " ", bookname)
     bookname = bookname.replace("?", "□").replace(
         "○", "〇"
