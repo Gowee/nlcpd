@@ -84,6 +84,8 @@ def retry(times=RETRY_TIMES):
 
 def stp(val):
     """Safe template param"""
+    if val is None:
+        return None
     return val.replace("[[", "[-{}-[")
 
 
