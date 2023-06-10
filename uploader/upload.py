@@ -434,6 +434,7 @@ def main():
                 )
 
             def genvols():
+                seen_file_paths = set()
                 for ivol, volume in enumerate(volumes):
                     abstract = metadata.get(
                         abstract_from_metadata_field,
@@ -447,6 +448,14 @@ def main():
                     )  # with preceding space
                     filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book_name_capped)}{book_name_suffix_wps}{volume_name_wps}.pdf'
                     pagename = "File:" + filename
+
+                    if volume["file_path"] in seen_file_paths:
+                        logger.warning(
+                            f"Skiping {filename} ({ivol + 1}/{len(volumes)}) which is a duplicate of a previous volume of the book: {volume['file_path']} of {len(seen_file_paths)})"
+                        )
+                        continue
+                    seen_file_paths.add(volume["file_path"])
+
                     secondary_task = None
                     if secondary_volume := volume.get("secondary_volume"):
                         secondary_filename = f'NLC{dbid}-{book["id"]}-{secondary_volume["id"]} {fix_bookname_in_pagename(book_name_capped)}{book_name_suffix_wps}{volume_name_wps}.pdf'
@@ -552,6 +561,9 @@ def main():
                                 elif dup := r.get("warnings", {}).get("duplicate"):
                                     assert len(dup) == 1, f"{dup}"
                                     dup = dup[0]
+                                    # if filename.split(maxsplit=1)[0].rsplit("-", maxsplit=1)[0] == dup.split()[0]:
+                                    #    logger.warning("")
+                                    # else:
                                     r = page.edit(
                                         f"#REDIRECT [[File:{dup}]]",
                                         comment + f" (Redirecting to [[File:{dup}]])",
