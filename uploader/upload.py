@@ -82,6 +82,11 @@ def retry(times=RETRY_TIMES):
     return wrapper
 
 
+def stp(val):
+    """Safe template param"""
+    return val.replace("[[", "[-{}-[")
+
+
 def gen_toc(toc):
     lines = []
     for no, entry in toc:
@@ -398,7 +403,9 @@ def main():
 
         metadata = book["misc_metadata"]
         if not up2ia:
-            additional_fields = "\n".join(f"  |{k}={v}" for k, v in metadata.items())
+            additional_fields = "\n".join(
+                f"  |{k}={stp(v)}" for k, v in metadata.items()
+            )
             if cap_category_name:
                 category_name = (
                     "Category:" + book_name_capped
@@ -586,11 +593,11 @@ def main():
 
                 nth = volume["index_in_book"] + 1
                 common_fields = f"""\
-  |byline={byline}
+  |byline={stp(byline)}
   |title={title}
-{nit_field}  |volume={volume_name}
-  |abstract={abstract or ""}
-  |toc={toc or ""}
+{nit_field}  |volume={stp(volume_name)}
+  |abstract={stp(abstract) or ""}
+  |toc={stp(toc) or ""}
   |catid={book['of_category_id']}
   |db={volume["of_collection_name"]}
   |dbid={dbid}
