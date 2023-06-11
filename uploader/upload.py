@@ -451,9 +451,8 @@ def main():
 
                     if volume["file_path"] in seen_file_paths:
                         logger.warning(
-                            f"Skiping {filename} ({ivol + 1}/{len(volumes)}) which is a duplicate of a previous volume of the book: {volume['file_path']} of {len(seen_file_paths)})"
+                            f"{filename} ({ivol + 1}/{len(volumes)}) duplicate with a previous volume of the book: {volume['file_path']} of {len(seen_file_paths)})"
                         )
-                        continue
                     seen_file_paths.add(volume["file_path"])
 
                     secondary_task = None
@@ -561,13 +560,18 @@ def main():
                                 elif dup := r.get("warnings", {}).get("duplicate"):
                                     assert len(dup) == 1, f"{dup}"
                                     dup = dup[0]
-                                    # if filename.split(maxsplit=1)[0].rsplit("-", maxsplit=1)[0] == dup.split()[0]:
-                                    #    logger.warning("")
-                                    # else:
-                                    r = page.edit(
-                                        f"#REDIRECT [[File:{dup}]]",
-                                        comment + f" (Redirecting to [[File:{dup}]])",
-                                    )
+                                    if dup.startswith(
+                                        re.match(r"NLC\d+-\d+-\d+", filename).group(0)
+                                    ):
+                                        logger.warning(
+                                            f"duplicate volume files in a single book: {dup} = {filename}"
+                                        )
+                                    else:
+                                        r = page.edit(
+                                            f"#REDIRECT [[File:{dup}]]",
+                                            comment
+                                            + f" (Redirecting to [[File:{dup}]])",
+                                        )
                                     assert (
                                         r.get("result") == "Success"
                                     ), f"Redirection failed {r}"
