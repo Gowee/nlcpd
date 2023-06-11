@@ -523,7 +523,7 @@ def main():
                     assert all(char not in set(r'["$*|\]</^>@#') for char in filename)
                     page = site.pages[pagename]
                     try:
-                        if not page.exists:
+                        if not page.exists or not page.imageinfo:
                             volume_id = (
                                 volume["id"]
                                 if not secondary
