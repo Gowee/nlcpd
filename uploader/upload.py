@@ -73,9 +73,9 @@ def retry(times=RETRY_TIMES):
                 except Exception as e:
                     nonlocal tried
                     tried += 1
-                    if tried == times:
+                    if tried >= times:
                         raise Exception(f"Failed finally after {times} tries") from e
-                    logger.info(f"Retrying {fn} due to {e}", exc_info=e)
+                    logger.info(f"Retrying {fn} {tried}/{times} due to {e}", exc_info=e)
 
         return wrapped
 
