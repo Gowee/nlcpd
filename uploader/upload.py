@@ -561,7 +561,7 @@ def main():
                                     assert len(dup) == 1, f"{dup}"
                                     dup = dup[0]
                                     if dup.startswith(
-                                        re.match(r"NLC\d+-\d+-\d+", filename).group(0)
+                                        re.match(r"NLC\d+-[\w-]+-\d+", filename).group(0)
                                     ):
                                         logger.warning(
                                             f"duplicate volume files in a single book: {dup} = {filename}"
