@@ -383,7 +383,7 @@ def main():
         volumes = book["volumes"]
         volumes.sort(key=lambda e: e["index_in_book"])
 
-        def get_volume_name_for_filename(volume):
+        def get_volume_name_for_filename(volume, last_volume):
             if not (
                 len(volumes) > 1
                 or getopt("always_include_volume_name_in_filename", False)
@@ -394,14 +394,23 @@ def main():
                     r"^第\d+[册冊卷]$", volume["name"]
                 ), volume["name"]
                 return str(volume["index_in_book"] + 1)
-            return (
-                volume["name"]
-                .replace("_", "–")
-                .replace("-", "–")
-                .replace("/", "–")
-                .replace("\n", " ")
-                or f"第{volume['index_in_book'] + 1}冊"
-            )
+            if volume["name"]:
+                return (
+                    volume["name"]
+                    .replace("_", "–")
+                    .replace("-", "–")
+                    .replace("/", "–")
+                    .replace("\n", " ")
+                )
+            else:
+                if last_volume and last_volume["name"]:
+                    assert re.match(r"^第\d+[册冊卷]$", last_volume["name"]), last_volume[
+                        "name"
+                    ]
+                    unit = last_volume["name"][-1]
+                else:
+                    unit = "冊"
+                return f"第{volume['index_in_book'] + 1}{unit}"
 
         metadata = book["misc_metadata"]
         if not up2ia:
@@ -442,7 +451,9 @@ def main():
                         or None,
                     )
                     toc = gen_toc(volume["toc"])
-                    volume_name = get_volume_name_for_filename(volume)
+                    volume_name = get_volume_name_for_filename(
+                        volume, volume[ivol - 1] if ivol >= 1 else None
+                    )
                     volume_name_wps = (
                         (" " + volume_name) if volume_name else ""
                     )  # with preceding space
@@ -561,7 +572,9 @@ def main():
                                     assert len(dup) == 1, f"{dup}"
                                     dup = dup[0]
                                     if dup.startswith(
-                                        re.match(r"NLC\d+-[\w-]+-\d+", filename).group(0)
+                                        re.match(r"NLC\d+-[\w-]+-\d+", filename).group(
+                                            0
+                                        )
                                     ):
                                         logger.warning(
                                             f"duplicate volume files in a single book: {dup} = {filename}"
@@ -790,7 +803,9 @@ def main():
                         f"{volume_identifier} exists in {identifier} as {f['title']}"
                     )
                     continue
-                volume_name = get_volume_name_for_filename(volume)
+                volume_name = get_volume_name_for_filename(
+                    volume, volume[ivol - 1] if ivol >= 1 else None
+                )
                 volume_name_wps = (
                     (" " + volume_name) if volume_name else ""
                 )  # with preceding space
