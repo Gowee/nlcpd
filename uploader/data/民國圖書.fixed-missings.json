@@ -399,7 +399,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/03jh004429/002/03jh004429_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "03jh004429",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -558,7 +561,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/03jh004435/002/03jh004435_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "03jh004435",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -1021,7 +1027,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/03jh004477/002/03jh004477_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "03jh004477",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -1079,7 +1088,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/05jh000291/002/05jh000291_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "05jh000291",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -1137,7 +1149,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/05jh000292/002/05jh000292_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "05jh000292",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -1199,14 +1214,20 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/05jh000293/002/05jh000293_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "05jh000293",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990006",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/05jh000293/003/05jh000293_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "05jh000293",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -1264,7 +1285,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/05jh000294/002/05jh000294_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "05jh000294",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -1326,14 +1350,20 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/05jh000296/002/05jh000296_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "05jh000296",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990009",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/05jh000296/003/05jh000296_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "05jh000296",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -1391,7 +1421,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/05jh000297/002/05jh000297_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "05jh000297",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -1449,7 +1482,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/05jh000298/002/05jh000298_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "05jh000298",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -1511,14 +1547,20 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/05jh000300/002/05jh000300_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "05jh000300",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990013",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/05jh000300/003/05jh000300_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "05jh000300",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -1900,14 +1942,20 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh007211/002/07jh007211_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh007211",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990015",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh007211/003/07jh007211_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "07jh007211",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -2007,7 +2055,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh007255/002/07jh007255_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh007255",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -4987,7 +5038,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh007291/002/07jh007291_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh007291",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -5217,7 +5271,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh007586/002/07jh007586_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh007586",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -5418,7 +5475,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh009437/002/07jh009437_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh009437",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -5576,7 +5636,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh009654/002/07jh009654_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh009654",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -5797,7 +5860,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh009915/002/07jh009915_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh009915",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -5906,7 +5972,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh009973/002/07jh009973_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh009973",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -8692,7 +8761,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh010191/002/07jh010191_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh010191",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -8826,7 +8898,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh010222/002/07jh010222_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh010222",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -8923,7 +8998,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh010305/002/07jh010305_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh010305",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -9229,7 +9307,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh010375/002/07jh010375_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh010375",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -9494,7 +9575,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh010442/002/07jh010442_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh010442",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -10572,7 +10656,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh010462/002/07jh010462_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh010462",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -10925,7 +11012,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh010698/002/07jh010698_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh010698",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -17318,28 +17408,40 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh012072/002/07jh012072_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh012072",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990031",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh012072/003/07jh012072_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "07jh012072",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990032",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh012072/004/07jh012072_004.pdf",
         "toc": [],
-        "index_in_book": 3
+        "index_in_book": 3,
+        "of_book_id": "07jh012072",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990033",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh012072/005/07jh012072_005.pdf",
         "toc": [],
-        "index_in_book": 4
+        "index_in_book": 4,
+        "of_book_id": "07jh012072",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -17957,7 +18059,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh012291/002/07jh012291_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh012291",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -18030,7 +18135,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh014806/002/07jh014806_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh014806",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -19495,7 +19603,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh014819/002/07jh014819_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh014819",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -19970,35 +20081,50 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh014829/002/07jh014829_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh014829",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990038",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh014829/003/07jh014829_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "07jh014829",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990039",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh014829/004/07jh014829_004.pdf",
         "toc": [],
-        "index_in_book": 3
+        "index_in_book": 3,
+        "of_book_id": "07jh014829",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990040",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh014829/005/07jh014829_005.pdf",
         "toc": [],
-        "index_in_book": 4
+        "index_in_book": 4,
+        "of_book_id": "07jh014829",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990041",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh014829/006/07jh014829_006.pdf",
         "toc": [],
-        "index_in_book": 5
+        "index_in_book": 5,
+        "of_book_id": "07jh014829",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -24427,7 +24553,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh014834/002/07jh014834_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh014834",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -24804,14 +24933,20 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh014847/002/07jh014847_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh014847",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990044",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh014847/003/07jh014847_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "07jh014847",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -24965,7 +25100,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh014874/002/07jh014874_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh014874",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -25071,7 +25209,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh014897/002/07jh014897_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh014897",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -26028,14 +26169,20 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh014901/002/07jh014901_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh014901",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990048",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh014901/003/07jh014901_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "07jh014901",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -26413,7 +26560,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh015131/002/07jh015131_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh015131",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -26730,7 +26880,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh015297/002/07jh015297_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh015297",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -27118,7 +27271,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh015436/002/07jh015436_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh015436",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -27335,7 +27491,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/07jh015565/002/07jh015565_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "07jh015565",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -27865,7 +28024,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh002814/002/08jh002814_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh002814",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -28302,21 +28464,30 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003050/002/08jh003050_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh003050",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990055",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003050/003/08jh003050_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "08jh003050",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990056",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003050/004/08jh003050_004.pdf",
         "toc": [],
-        "index_in_book": 3
+        "index_in_book": 3,
+        "of_book_id": "08jh003050",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -29105,28 +29276,40 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003212/002/08jh003212_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh003212",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990058",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003212/003/08jh003212_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "08jh003212",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990059",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003212/004/08jh003212_004.pdf",
         "toc": [],
-        "index_in_book": 3
+        "index_in_book": 3,
+        "of_book_id": "08jh003212",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990060",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003212/005/08jh003212_005.pdf",
         "toc": [],
-        "index_in_book": 4
+        "index_in_book": 4,
+        "of_book_id": "08jh003212",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -29175,7 +29358,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003257/002/08jh003257_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh003257",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -29405,14 +29591,20 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003413/002/08jh003413_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh003413",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990063",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003413/003/08jh003413_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "08jh003413",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -29861,14 +30053,20 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003474/002/08jh003474_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh003474",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990065",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003474/003/08jh003474_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "08jh003474",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -30113,14 +30311,20 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003675/002/08jh003675_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh003675",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990067",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003675/003/08jh003675_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "08jh003675",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -31225,7 +31429,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003713/002/08jh003713_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh003713",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -31478,7 +31685,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh003768/002/08jh003768_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh003768",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -31683,7 +31893,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh004008/002/08jh004008_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh004008",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -32228,21 +32441,30 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh004938/002/08jh004938_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh004938",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990072",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh004938/003/08jh004938_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "08jh004938",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990073",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh004938/004/08jh004938_004.pdf",
         "toc": [],
-        "index_in_book": 3
+        "index_in_book": 3,
+        "of_book_id": "08jh004938",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -32772,7 +32994,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh009299/002/08jh009299_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh009299",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -33306,14 +33531,20 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh009320/002/08jh009320_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh009320",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990076",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh009320/003/08jh009320_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "08jh009320",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -33670,7 +33901,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh009326/002/08jh009326_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh009326",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -34015,7 +34249,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh009330/002/08jh009330_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh009330",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -38588,7 +38825,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh009377/002/08jh009377_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh009377",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -39849,7 +40089,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh009417/002/08jh009417_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh009417",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -40458,7 +40701,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh009447/002/08jh009447_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh009447",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -41018,7 +41264,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh012581/002/08jh012581_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh012581",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -41076,7 +41325,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh012620/002/08jh012620_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh012620",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -41144,7 +41396,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh012625/002/08jh012625_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh012625",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -42172,35 +42427,50 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh012649/002/08jh012649_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh012649",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990086",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh012649/003/08jh012649_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "08jh012649",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990087",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh012649/004/08jh012649_004.pdf",
         "toc": [],
-        "index_in_book": 3
+        "index_in_book": 3,
+        "of_book_id": "08jh012649",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990088",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh012649/005/08jh012649_005.pdf",
         "toc": [],
-        "index_in_book": 4
+        "index_in_book": 4,
+        "of_book_id": "08jh012649",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990089",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh012649/006/08jh012649_006.pdf",
         "toc": [],
-        "index_in_book": 5
+        "index_in_book": 5,
+        "of_book_id": "08jh012649",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -42385,7 +42655,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh012733/002/08jh012733_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh012733",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -42498,7 +42771,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/08jh013561/002/08jh013561_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "08jh013561",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -44083,7 +44359,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/09jh000050/002/09jh000050_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "09jh000050",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -45060,7 +45339,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/09jh000051/002/09jh000051_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "09jh000051",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -45741,49 +46023,70 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/09jh000061/002/09jh000061_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "09jh000061",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990095",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/09jh000061/003/09jh000061_003.pdf",
         "toc": [],
-        "index_in_book": 2
+        "index_in_book": 2,
+        "of_book_id": "09jh000061",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990096",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/09jh000061/004/09jh000061_004.pdf",
         "toc": [],
-        "index_in_book": 3
+        "index_in_book": 3,
+        "of_book_id": "09jh000061",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990097",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/09jh000061/005/09jh000061_005.pdf",
         "toc": [],
-        "index_in_book": 4
+        "index_in_book": 4,
+        "of_book_id": "09jh000061",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990098",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/09jh000061/006/09jh000061_006.pdf",
         "toc": [],
-        "index_in_book": 5
+        "index_in_book": 5,
+        "of_book_id": "09jh000061",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990099",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/09jh000061/007/09jh000061_007.pdf",
         "toc": [],
-        "index_in_book": 6
+        "index_in_book": 6,
+        "of_book_id": "09jh000061",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       },
       {
         "id": "999990100",
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20120629_13/PDF/duixiang/09jh000061/008/09jh000061_008.pdf",
         "toc": [],
-        "index_in_book": 7
+        "index_in_book": 7,
+        "of_book_id": "09jh000061",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
@@ -45837,7 +46140,10 @@
         "name": null,
         "file_path": "data13/mgts_minguotushu/mgts20130402_01/duixiang/59/09jh001538/002/09jh001538_002.pdf",
         "toc": [],
-        "index_in_book": 1
+        "index_in_book": 1,
+        "of_book_id": "09jh001538",
+        "of_collection_name": "data_416",
+        "__NOTE__": "The volume is not present on the book info page of upstream. It is found on the upstream static file server per file_path naming convension."
       }
     ],
     "of_category_id": "24",
