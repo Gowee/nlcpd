@@ -452,7 +452,7 @@ def main():
                     )
                     toc = gen_toc(volume["toc"])
                     volume_name = get_volume_name_for_filename(
-                        volume, volume[ivol - 1] if ivol >= 1 else None
+                        volume, volumes[ivol - 1] if ivol >= 1 else None
                     )
                     volume_name_wps = (
                         (" " + volume_name) if volume_name else ""
@@ -804,7 +804,7 @@ def main():
                     )
                     continue
                 volume_name = get_volume_name_for_filename(
-                    volume, volume[ivol - 1] if ivol >= 1 else None
+                    volume, volumes[ivol - 1] if ivol >= 1 else None
                 )
                 volume_name_wps = (
                     (" " + volume_name) if volume_name else ""
