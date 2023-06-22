@@ -98,7 +98,7 @@ def gen_toc(toc):
     contents = " <br/>\n".join(lines)
     if contents:
         contents = "<p>\n" + contents + "\n</p>"
-        contents += "\n<!--The toc provided by NLC may have some volumes missed. To be corrected.-->"
+        contents += "\n{{^|The toc provided by NLC may have some volumes missed. To be corrected.}}"
     return contents
 
 
@@ -581,7 +581,9 @@ def main():
                                         )
                                     else:
                                         r = page.edit(
-                                            f"#REDIRECT [[File:{dup}]]",
+                                            f"#REDIRECT [[File:{dup}]]\n\n<!--\n"
+                                            + volume_wikitext
+                                            + "\n-->",
                                             comment
                                             + f" (Redirecting to [[File:{dup}]])",
                                         )
