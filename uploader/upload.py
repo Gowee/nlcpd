@@ -15,10 +15,12 @@ from datetime import datetime, timezone
 from unicodedata import name
 from more_itertools import peekable
 from typing import Literal
+from pathlib import Path
 
 import requests
 import yaml
 import mwclient
+import pywikibot, pywikibot.exceptions
 import internetarchive as ia
 from mwclient_contenttranslation import CxTranslator
 
@@ -28,6 +30,9 @@ CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.yml")
 POSITION_FILE_PATH = os.path.join(os.path.dirname(__file__), ".position")
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 NAME_CAP_FIX_PATH = os.path.join(DATA_DIR, "namecapfix.yml")
+CACHE_FILE_PATH = Path(__file__).parent / ".cache.pdf"
+CHUNK_SIZE = 32 * 1024 * 1024
+ASYNC_UPLOAD_THRESHOLD = 256 * 1024 * 1024
 RETRY_TIMES = 3
 
 USER_AGENT = "nlcpdbot/0.0 (+https://github.com/gowee/nlcpd)"
@@ -103,7 +108,7 @@ def gen_toc(toc):
 
 
 @retry()
-def getbook_unified(volume, secondary=False, proxies=None):
+def getbook_unified(volume, secondary=False, proxies=None, save_file=False):
     logger.debug(f"Fetching {volume}")
     # if "fileiplogger.info("Failed to get file by path: " + str(e), ", fallbacking to getbook")
     volume_id = volume["id"] if not secondary else volume["secondary_volume"]["id"]
@@ -112,12 +117,18 @@ def getbook_unified(volume, secondary=False, proxies=None):
         if not secondary
         else volume["secondary_volume"]["file_path"]
     )
-    return getbook(
+    b = getbook(
         volume["of_collection_name"].removeprefix("data_"),
         volume_id,
         file_path,
         proxies,
     )
+    if save_file:
+        with open(CACHE_FILE_PATH, "wb") as f:
+            f.write(b)
+        return CACHE_FILE_PATH
+    else:
+        return b
 
 
 def split_name_heuristic(name):
@@ -183,12 +194,13 @@ def main():
     cxtrans: CxTranslator = None
     translate_bookname_and_byline = lambda a, b: None
     if not up2ia:
-        username, password = config["username"], config["password"]
-        site = mwclient.Site("commons.wikimedia.org")
-        site.login(username, password)
-        site.requests["timeout"] = 125
-        site.chunk_size = 1024 * 1024 * 64
-        logger.info(f"Signed in as {username} on Commons")
+        # username, password = config["username"], config["password"]
+        site = pywikibot.Site("commons")
+        site.login()
+        # site.requests["timeout"] = 125
+        # site.chunk_size = 1024 * 1024 * 64
+        logger.info(f"Signed in on Commons")
+        # logger.info(f"Signed in as {username} on Commons")
     else:
         username, password = config["username"], config["password"]
         iausername, iapassword = config["iausername"], config["iapassword"]
@@ -286,13 +298,14 @@ def main():
             return  # TODO: no remote logging when up2ia
         # NOTE: possible racing condition since no sync & lock
         d = str(datetime.now(timezone.utc))
-        page = site.pages[log_page_name]
+        page = pywikibot.Page(site, log_page_name)
         wikitext = ""
-        if page.exists:
-            wikitext = page.text()
+        if page.exists():
+            wikitext = page.text
         wikitext += f"\n* <code>{d} - {batch_name}</code> " + l + "\n"
         logger.debug(f"add log to wiki: {l}")
-        page.edit(wikitext, f"Log (batch:nlc; {batch_link}): {l}")
+        page.text = wikitext
+        page.save(f"Log (batch:nlc; {batch_link}): {l}")
 
     last_position = load_position(batch_name)
 
@@ -428,9 +441,9 @@ def main():
                 category_name = "Category:" + overwriting_categories[k]
             else:
                 category_name = "Category:" + fix_bookname_in_pagename(title)
-            category_page = site.pages[category_name]
+            category_page = pywikibot.Page(site, category_name)
             # TODO: for now we do not create a seperated category suffixed with the edition
-            if not category_page.exists:
+            if not category_page.exists():
                 category_wikitext = (
                     """{{Wikidata Infobox}}
 {{Category for book|zh}}
@@ -440,8 +453,8 @@ def main():
 """
                     % title
                 )
-                category_page.edit(
-                    category_wikitext,
+                category_page.text = category_wikitext
+                category_page.save(
                     f"Creating (batch task; nlc:{book['of_collection_name']},{book['id']})",
                 )
 
@@ -535,9 +548,9 @@ def main():
                 ):
                     nonlocal failcnt
                     assert all(char not in set(r'["$*|\]</^>@#') for char in filename)
-                    page = site.pages[pagename]
+                    page = pywikibot.FilePage(site, pagename)
                     try:
-                        if not page.exists or not page.imageinfo:
+                        if not page.exists():  # or not page.imageinfo:
                             volume_id = (
                                 volume["id"]
                                 if not secondary
@@ -547,60 +560,83 @@ def main():
                             logger.info(
                                 f'Downloading {dbid},{book["id"]},{volume_id}{note}'
                             )
-                            binary = getbook_unified(volume, secondary, nlc_proxies)
+                            binary = getbook_unified(volume, secondary, nlc_proxies, save_file=True)
                             # https://stackoverflow.com/a/17280876/5488616
-                            if len(binary) < MINIMUM_VALID_PDF_SIZE:
+                            size = binary.stat().st_size
+                            if size < MINIMUM_VALID_PDF_SIZE:
                                 log_to_remote(
-                                    f"[[:{pagename}]] is too small ({len(binary)} < {MINIMUM_VALID_PDF_SIZE}) to be well-formed"
+                                    f"[[:{pagename}]] is too small ({size} < {MINIMUM_VALID_PDF_SIZE}) to be well-formed"
                                 )
                                 raise Exception(
-                                    f"PDF is too small ({len(binary)} < {MINIMUM_VALID_PDF_SIZE})"
+                                    f"PDF is too small ({size} < {MINIMUM_VALID_PDF_SIZE})"
                                 )
-                            logger.info(f"Uploading {pagename} ({len(binary)} B)")
+                            logger.info(f"Uploading {pagename} ({size} B)")
 
                             @retry()
                             def do1():
-                                r = site.upload(
-                                    BytesIO(binary),
-                                    filename=filename,
-                                    description=volume_wikitext,
-                                    comment=comment,
-                                )
-                                r = r or {}
-                                if r.get("warnings", {}).get("exists"):
-                                    logger.warning(
-                                        "Conflicts with existing page. Is there another worker running in parallel?"
+                                e = None
+                                try:
+                                    r = site.upload(
+                                        source_filename=binary,
+                                        filepage=page,
+                                        text=volume_wikitext,
+                                        comment=comment,
+                                        asynchronous=size > ASYNC_UPLOAD_THRESHOLD,
+                                        chunk_size=CHUNK_SIZE,
+                                        ignore_warnings=["was-deleted"],
+                                        # report_success=True,
                                     )
-                                elif dup := r.get("warnings", {}).get("duplicate"):
-                                    assert len(dup) == 1, f"{dup}"
-                                    dup = dup[0]
-                                    if dup.startswith(
-                                        re.match(r"NLC\d+-[\w-]+-\d+", filename).group(
-                                            0
-                                        )
-                                    ):
+                                    assert r
+                                except pywikibot.exceptions.UploadError as e:
+                                    e = e
+                                    pass
+                                # r = r or {}
+                                if e:
+                                    if (
+                                        e.code == "was-deleted"
+                                    ):  # r.get("warnings", {}).get("exists"):
                                         logger.warning(
-                                            f"duplicate volume files in a single book: {dup} = {filename}"
+                                            "Conflicts with existing page. Is there another worker running in parallel?"
                                         )
-                                    else:
-                                        r = page.edit(
-                                            f"#REDIRECT [[File:{dup}]]\n\n<!--\n"
-                                            + volume_wikitext
-                                            + "\n-->",
-                                            comment
-                                            + f" (Redirecting to [[File:{dup}]])",
+                                    elif (
+                                        e.code == "duplicate"
+                                    ):  # dup := r.get("warnings", {}).get("duplicate"):
+                                        # assert len(dup) == 1, f"{dup}"
+                                        # dup = dup[0]
+                                        dup = e.msg
+                                        if dup.startswith("File:"):
+                                            dup = dup[5:]
+                                        if dup.startswith(
+                                            re.match(r"NLC\d+-[\w-]+-\d+", filename).group(
+                                                0
+                                            )
+                                        ):
+                                            logger.warning(
+                                                f"duplicate volume files in a single book: {dup} = {filename}"
+                                            )
+                                        else:
+                                            page.text = (
+                                                f"#REDIRECT [[File:{dup}]]\n\n<!--\n"
+                                                + volume_wikitext
+                                                + "\n-->",
+                                            )
+                                            r = page.save(
+                                                comment
+                                                + f" (Redirecting to [[File:{dup}]])",
+                                            )
+                                        assert r, "Redirection failed"
+                                        # assert (
+                                        #     r.get("result") == "Success"
+                                        # ), f"Redirection failed {r}"
+                                        log_to_remote(
+                                            f"[[:{pagename}]] duplicates with the existing [[:File:{dup}]] ({size}B)"
                                         )
-                                    assert (
-                                        r.get("result") == "Success"
-                                    ), f"Redirection failed {r}"
-                                    log_to_remote(
-                                        f"[[:{pagename}]] duplicates with the existing [[:File:{dup}]] ({len(binary)}B)"
-                                    )
                                 else:
-                                    assert (
-                                        r.get("result")
-                                        or r.get("upload", {}).get("result")
-                                    ) == "Success", f"Upload failed {r}"
+                                    # assert (
+                                    #     r.get("result")
+                                    #     or r.get("upload", {}).get("result")
+                                    # ) == "Success", f"Upload failed {r}"
+                                    assert r, "Upload failed"
 
                             do1()
                         else:
@@ -611,13 +647,14 @@ def main():
 
                                 @retry()
                                 def do2():
-                                    r = page.edit(
-                                        volume_wikitext,
+                                    page.text = volume_wikitext
+                                    r = page.save(
                                         comment + " (Updating metadata)",
                                     )
-                                    assert (r or {}).get(
-                                        "result", {}
-                                    ) == "Success", f"Update failed {r}"
+                                    # assert (r or {}).get(
+                                    #     "result", {}
+                                    # ) == "Success", f"Update failed {r}"
+                                    assert r, "Update failed"
 
                                 do2()
                     except Exception as e:

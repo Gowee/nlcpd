@@ -68,6 +68,7 @@ def getbook(aid: str, bid: str, file_path=None, proxies=None):
         proxies=proxies,
     )
     resp.raise_for_status()
+    assert resp.headers.get("Content-Type").endswith("/pdf") or resp.headers.get("Content-Type").endswith("/octet-stream")
     assert len(resp.content) != 0, "Got empty file"
     if "Content-Length" in resp.headers:
         # https://blog.petrzemek.net/2018/04/22/on-incomplete-http-reads-and-the-requests-library-in-python/
