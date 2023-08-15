@@ -7,7 +7,7 @@ authors = ["Hung-I Wang <whygowe@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.10"
 mwclient = "^0.10.1"
-zhconv-rs = "^0.1.0-rc.6"
+zhconv-rs = "^0.3.0"
 PyYAML = "^6.0"
 requests = "^2.28.1"
 more-itertools = "^9.0.0"
