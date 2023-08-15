@@ -1,4 +1,5 @@
-.position
+.position.*
 config.yml
 user-password.py
+.cache.*.pdf
 

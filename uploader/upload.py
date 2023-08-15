@@ -30,7 +30,7 @@ CONFIG_FILE_PATH = os.path.join(os.path.dirname(__file__), "config.yml")
 POSITION_FILE_PATH = os.path.join(os.path.dirname(__file__), ".position")
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 NAME_CAP_FIX_PATH = os.path.join(DATA_DIR, "namecapfix.yml")
-CACHE_FILE_PATH = Path(__file__).parent / ".cache.pdf"
+CACHE_FILE_DIR = Path(__file__).parent
 CHUNK_SIZE = 32 * 1024 * 1024
 ASYNC_UPLOAD_THRESHOLD = 256 * 1024 * 1024
 RETRY_TIMES = 3
@@ -108,7 +108,7 @@ def gen_toc(toc):
 
 
 @retry()
-def getbook_unified(volume, secondary=False, proxies=None, save_file=False):
+def getbook_unified(volume, secondary=False, proxies=None):
     logger.debug(f"Fetching {volume}")
     # if "fileiplogger.info("Failed to get file by path: " + str(e), ", fallbacking to getbook")
     volume_id = volume["id"] if not secondary else volume["secondary_volume"]["id"]
@@ -123,12 +123,7 @@ def getbook_unified(volume, secondary=False, proxies=None, save_file=False):
         file_path,
         proxies,
     )
-    if save_file:
-        with open(CACHE_FILE_PATH, "wb") as f:
-            f.write(b)
-        return CACHE_FILE_PATH
-    else:
-        return b
+    return b
 
 
 def split_name_heuristic(name):
@@ -189,6 +184,8 @@ def main():
         )
     batch_name = sys.argv[1]
     up2ia = len(sys.argv) >= 3 and sys.argv[2].strip() == "--ia"
+
+    cache_file_path = CACHE_FILE_DIR / f".cache.{batch_name}.pdf"
 
     site: mwclient.Site = None  # to make linter happy
     cxtrans: CxTranslator = None
@@ -560,9 +557,11 @@ def main():
                             logger.info(
                                 f'Downloading {dbid},{book["id"]},{volume_id}{note}'
                             )
-                            binary = getbook_unified(volume, secondary, nlc_proxies, save_file=True)
+                            binary = getbook_unified(volume, secondary, nlc_proxies)
+                            with open(cache_file_path, "wb") as f:
+                                f.write(binary)
                             # https://stackoverflow.com/a/17280876/5488616
-                            size = binary.stat().st_size
+                            size = len(binary)
                             if size < MINIMUM_VALID_PDF_SIZE:
                                 log_to_remote(
                                     f"[[:{pagename}]] is too small ({size} < {MINIMUM_VALID_PDF_SIZE}) to be well-formed"
@@ -577,7 +576,7 @@ def main():
                                 e = None
                                 try:
                                     r = site.upload(
-                                        source_filename=binary,
+                                        source_filename=cache_file_path,
                                         filepage=page,
                                         text=volume_wikitext,
                                         comment=comment,
@@ -607,9 +606,9 @@ def main():
                                         if dup.startswith("File:"):
                                             dup = dup[5:]
                                         if dup.startswith(
-                                            re.match(r"NLC\d+-[\w-]+-\d+", filename).group(
-                                                0
-                                            )
+                                            re.match(
+                                                r"NLC\d+-[\w-]+-\d+", filename
+                                            ).group(0)
                                         ):
                                             logger.warning(
                                                 f"duplicate volume files in a single book: {dup} = {filename}"
