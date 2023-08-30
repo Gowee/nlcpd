@@ -71,9 +71,9 @@ class TxMongoPipeline(object):
         # https://github.com/twisted/txmongo/issues/236
         self.connection = yield txmongo.connection.ConnectionPool(
             self.mongo_uri,
-            ssl_context_factory=ssl.optionsForClientTLS(
-                parse_uri(self.mongo_uri)["nodelist"][0][0]
-            ),
+            # ssl_context_factory=ssl.optionsForClientTLS(
+            #     parse_uri(self.mongo_uri)["nodelist"][0][0]
+            # ),
         )
         self.db = self.connection[self.db_name]
 

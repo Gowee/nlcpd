@@ -100,7 +100,8 @@ class VolumeItem:
 
     id: str  # bid
     name: str
-    file_path: Optional[str]  # internal file path of NLC
+    file_path: Optional[Union[str, list[str]]] # internal pdf file path of NLC; or list of image urls for newspapers
+    lid: Optional[str] # for image list only, typically date for newspapers (aid = 1080)
     toc: list[Tuple[str, str]]  # list of chapter number and capther name pairs
     secondary_volume: Optional[SecondaryVolumeItem]
     index_in_book: int

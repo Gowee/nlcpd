@@ -9,9 +9,12 @@ python = "^3.9"
 Scrapy = "^2.5.0"
 txmongo = "^19.2.0"
 dnspython = "^2.1.0"
+lxml = "^4.9.3" # ensure up to update
 
 [tool.poetry.dev-dependencies]
-black = "^21.5b1"
+
+[tool.poetry.group.dev.dependencies]
+pyink = "^23.5.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

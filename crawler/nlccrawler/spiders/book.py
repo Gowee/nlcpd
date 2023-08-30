@@ -15,6 +15,7 @@ class BookSpider(scrapy.Spider):
     URL_LIST_PAGE = "http://read.nlc.cn/allSearch/searchList?searchType={category}&showType=1&pageNo={page}"
     URL_VOLUME_READER = "http://read.nlc.cn/OutOpenBook/OpenObjectBook?aid={collection_id}&bid={volume_id}"
     URL_VOLUME_TOC = "http://read.nlc.cn/allSearch/formatCatalog"
+    URL_VOLUME_IMAGE_LIST = "http://read.nlc.cn/allSearch/openBookPic?id={volume_id}&l_id={date}&indexName={collection_name}"
 
     REGEX_PDFNAME_IN_READER = re.compile(r"var pdfname= '(.+?)';")
 
@@ -196,20 +197,53 @@ class BookSpider(scrapy.Spider):
                         "secondary_volume_file_path": secondary_volume_file_path,
                     }
                 )
-                yield response.follow(
-                    self.URL_VOLUME_TOC,
-                    method="POST",
-                    headers={"Content-Type": "application/x-www-form-urlencoded"},
-                    body=urlencode(
-                        {
-                            "id": volume_id,
-                            "indexName": response.meta["collection_name"],
-                        }
-                    ),
-                    meta=response.meta,
-                    priority=self.PRIO_VOLUME,
-                    callback=self.parse_volume_toc,
+                if not self.no_volume:
+                    yield response.follow(
+                        self.URL_VOLUME_TOC,
+                        method="POST",
+                        headers={"Content-Type": "application/x-www-form-urlencoded"},
+                        body=urlencode(
+                            {
+                                "id": volume_id,
+                                "indexName": response.meta["collection_name"],
+                            }
+                        ),
+                        meta=response.meta,
+                        priority=self.PRIO_VOLUME,
+                        callback=self.parse_volume_toc,
+                    )
+            elif image_list_url := volume.css(
+                'a[href*="/OpenObjectPic"]::attr(href)'
+            ).get():
+                params = dict(parse_qsl(urlparse(image_list_url).query))
+                assert "data_" + (params.get("aid") or "") == collection_name
+                volume_id = params["bid"].removesuffix(".0")
+                lid = params["lid"]
+                assert book_id == params.get("did")
+                response.meta.update(
+                    {
+                        # "collection_name": collection_name,
+                        # "page": page,
+                        # "book_id": book_id,
+                        "volume_id": volume_id,
+                        "volume_name": volume_name,
+                        "index_in_book": vidx,
+                        "volume_lid": lid,
+                        # "volume_file_path": file_path,
+                        # "secondary_volume_id": secondary_volume_id,
+                        # "secondary_volume_file_path": secondary_volume_file_path,
+                    }
                 )
+
+                if not self.no_volume:
+                    yield response.follow(
+                        self.URL_VOLUME_IMAGE_LIST.format(
+                            collection_name=collection_name, volume_id=volume_id, date=lid
+                        ),
+                        priority=self.PRIO_VOLUME,
+                        meta=response.meta,
+                        callback=self.parse_volume_image_list,
+                    )
             else:
                 volume_url = volume.css('a[href*="/OpenObjectBook"]::attr(href)').get()
                 volume_url_params = dict(parse_qsl(urlparse(volume_url).query))
@@ -274,6 +308,28 @@ class BookSpider(scrapy.Spider):
             callback=self.parse_volume_toc,
         )
 
+    def parse_volume_image_list(self, response):
+        volume_id = response.meta["volume_id"]
+        urls = []
+        for url in response.css(".PG_main img::attr(src)").getall():
+            assert "/doc" in url
+            urls.append(url)
+        response.meta.update({"volume_file_path": urls})
+        yield response.follow(
+            self.URL_VOLUME_TOC,
+            method="POST",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            body=urlencode(
+                {
+                    "id": volume_id,
+                    "indexName": response.meta["collection_name"],
+                }
+            ),
+            meta=response.meta,
+            priority=self.PRIO_VOLUME,
+            callback=self.parse_volume_toc,
+        )
+
     def parse_volume_toc(self, response):
         collection_name = response.meta["collection_name"]
         book_id = response.meta["book_id"]
@@ -287,6 +343,7 @@ class BookSpider(scrapy.Spider):
                 "id": response.meta["secondary_volume_id"],
                 "file_path": response.meta["secondary_volume_file_path"],
             }
+        volume_lid = response.meta.get("volume_lid", None)
 
         d = response.json()
         assert d["success"]
@@ -309,6 +366,7 @@ class BookSpider(scrapy.Spider):
             id=volume_id,
             name=volume_name,
             file_path=volume_file_path,
+            lid=volume_lid,
             toc=toc,
             secondary_volume=secondary_volume,
             index_in_book=index_in_book,
