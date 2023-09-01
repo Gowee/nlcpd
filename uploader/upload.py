@@ -430,6 +430,7 @@ def main():
             additional_fields = "\n".join(
                 f"  |{k}={stp(v)}" for k, v in metadata.items()
             )
+            
             if cap_category_name:
                 category_name = (
                     "Category:" + book_name_capped
@@ -473,7 +474,7 @@ def main():
                     filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book_name_capped)}{book_name_suffix_wps}{volume_name_wps}.pdf'
                     pagename = "File:" + filename
 
-                    if isinstance(volume["file_path"], Sequence):
+                    if isinstance(volume["file_path"], str):
                         if volume["file_path"] in seen_file_paths:
                             logger.warning(
                                 f"{filename} ({ivol + 1}/{len(volumes)}) duplicate with a previous volume of the book: {volume['file_path']} of {len(seen_file_paths)})"
@@ -654,7 +655,8 @@ def main():
                                     # assert (r or {}).get(
                                     #     "result", {}
                                     # ) == "Success", f"Update failed {r}"
-                                    assert r, "Update failed"
+                                    # assert r, f"Update failed: {r}"
+                                    # r is None here
 
                                 do2()
                     except Exception as e:
@@ -679,12 +681,18 @@ def main():
   |volumetotal={len(volumes)}\
 """
                 if secondary_task is None:
+                    source_url_fields = ""
+                    if isinstance(volume["file_path"], Sequence):
+                        source_url_fields = "\n"
+                        source_url_fields +=  "\n".join(
+                            f"  |sourceurl{i+1}={stp(url)}" for i, url in enumerate(volume["file_path"])
+                        )
                     primary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
 {{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={nth}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}
 {{{{{template}
 {common_fields}
   |volumeid={volume["id"]}
-{additional_fields}
+{additional_fields}{source_url_fields}
 }}}}
 {"{{Watermark}}" if watermark_tag else ""}
 
@@ -693,6 +701,7 @@ def main():
 
                     do_upload(filename, pagename, primary_volume_wikitext, comment)
                 else:
+                    # TODO: source_url_fields
                     primary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
 {{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|secondaryvolume={secondary_filename}|nth={volume['index_in_book'] + 1}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}|secondaryvolumeid={secondary_volume["id"]}}}}}
 {{{{{template}

@@ -311,6 +311,7 @@ class BookSpider(scrapy.Spider):
 
     def parse_volume_image_list(self, response):
         volume_id = response.meta["volume_id"]
+        # TODO: single image
         urls = []
         for url in response.css(".PG_main img::attr(src)").getall():
             assert "/doc" in url
