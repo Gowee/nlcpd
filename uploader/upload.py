@@ -14,7 +14,7 @@ from functools import lru_cache
 from datetime import datetime, timezone
 from unicodedata import name
 from more_itertools import peekable
-from typing import Literal, Sequence
+from typing import Literal
 from pathlib import Path
 
 import requests
@@ -32,7 +32,7 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 NAME_CAP_FIX_PATH = os.path.join(DATA_DIR, "namecapfix.yml")
 CACHE_FILE_DIR = Path(__file__).parent
 CHUNK_SIZE = 32 * 1024 * 1024
-ASYNC_UPLOAD_THRESHOLD = 256 * 1024 * 1024
+ASYNC_UPLOAD_THRESHOLD = 1 # 256 * 1024 * 1024
 RETRY_TIMES = 3
 
 USER_AGENT = "nlcpdbot/0.0 (+https://github.com/gowee/nlcpd)"
@@ -682,7 +682,7 @@ def main():
 """
                 if secondary_task is None:
                     source_url_fields = ""
-                    if isinstance(volume["file_path"], Sequence):
+                    if isinstance(volume["file_path"], list):
                         source_url_fields = "\n"
                         source_url_fields +=  "\n".join(
                             f"  |sourceurl{i+1}={stp(url)}" for i, url in enumerate(volume["file_path"])

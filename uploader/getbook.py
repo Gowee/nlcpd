@@ -1,5 +1,4 @@
 import re
-from typing import Sequence
 import logging
 import functools
 from pathlib import Path
@@ -84,7 +83,7 @@ def fetch_image_list(image_urls, file=None):
 
 
 def getbook(aid: str, bid: str, file_path=None, proxies=None):
-    if file_path and isinstance(file_path, Sequence):
+    if file_path and not isinstance(file_path, str):
         return fetch_image_list(file_path)
     else:
         resp = requests.get(

@@ -39,7 +39,7 @@ def main():
             for volume in book["volumes"]:
                 logger.info("%s - %s", book["name"], volume["name"])
                 # assert len(set(volume["file_path"])) % 2 == 0, volume
-                assert isinstance(volume["file_path"], Sequence)
+                assert isinstance(volume["file_path"], list)
                 sorted_distinct_urls = sorted(set(volume["file_path"]))
                 if (a := len(sorted_distinct_urls)) != (b := len(volume["file_path"])):
                     logger.warn(
