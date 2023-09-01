@@ -14,7 +14,7 @@ from functools import lru_cache
 from datetime import datetime, timezone
 from unicodedata import name
 from more_itertools import peekable
-from typing import Literal
+from typing import Literal, Sequence
 from pathlib import Path
 
 import requests
@@ -473,11 +473,12 @@ def main():
                     filename = f'NLC{dbid}-{book["id"]}-{volume["id"]} {fix_bookname_in_pagename(book_name_capped)}{book_name_suffix_wps}{volume_name_wps}.pdf'
                     pagename = "File:" + filename
 
-                    if volume["file_path"] in seen_file_paths:
-                        logger.warning(
-                            f"{filename} ({ivol + 1}/{len(volumes)}) duplicate with a previous volume of the book: {volume['file_path']} of {len(seen_file_paths)})"
-                        )
-                    seen_file_paths.add(volume["file_path"])
+                    if isinstance(volume["file_path"], Sequence):
+                        if volume["file_path"] in seen_file_paths:
+                            logger.warning(
+                                f"{filename} ({ivol + 1}/{len(volumes)}) duplicate with a previous volume of the book: {volume['file_path']} of {len(seen_file_paths)})"
+                            )
+                        seen_file_paths.add(volume["file_path"])
 
                     secondary_task = None
                     if secondary_volume := volume.get("secondary_volume"):
