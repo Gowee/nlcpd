@@ -37,6 +37,7 @@ class BookSpider(scrapy.Spider):
         self.category = category
         self.start_page = int(start_page)
         self.end_page = int(end_page)
+        assert self.start_page <= self.end_page
         self.no_book = no_book
         self.no_volume = no_volume
 
