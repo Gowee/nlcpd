@@ -32,7 +32,7 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 NAME_CAP_FIX_PATH = os.path.join(DATA_DIR, "namecapfix.yml")
 CACHE_FILE_DIR = Path(__file__).parent
 CHUNK_SIZE = 32 * 1024 * 1024
-ASYNC_UPLOAD_THRESHOLD = 1 # 256 * 1024 * 1024
+ASYNC_UPLOAD_THRESHOLD = 256 * 1024 * 1024
 RETRY_TIMES = 3
 
 USER_AGENT = "nlcpdbot/0.0 (+https://github.com/gowee/nlcpd)"
