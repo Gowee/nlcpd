@@ -15,6 +15,7 @@ internetarchive = "^3.3.0"
 mwclient-contenttranslation = "^0.1.0"
 pywikibot = "^8.3.0"
 img2pdf = "^0.4.4"
+qrcode = "^7.4.2"
 
 [tool.poetry.dev-dependencies]
 

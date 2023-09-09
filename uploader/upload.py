@@ -32,7 +32,7 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 NAME_CAP_FIX_PATH = os.path.join(DATA_DIR, "namecapfix.yml")
 CACHE_FILE_DIR = Path(__file__).parent
 CHUNK_SIZE = 32 * 1024 * 1024
-ASYNC_UPLOAD_THRESHOLD = 256 * 1024 * 1024
+ASYNC_UPLOAD_THRESHOLD = 128 * 1024 * 1024
 RETRY_TIMES = 3
 
 USER_AGENT = "nlcpdbot/0.0 (+https://github.com/gowee/nlcpd)"
@@ -430,7 +430,7 @@ def main():
             additional_fields = "\n".join(
                 f"  |{k}={stp(v)}" for k, v in metadata.items()
             )
-            
+
             if cap_category_name:
                 category_name = (
                     "Category:" + book_name_capped
@@ -684,8 +684,9 @@ def main():
                     source_url_fields = ""
                     if isinstance(volume["file_path"], list):
                         source_url_fields = "\n"
-                        source_url_fields +=  "\n".join(
-                            f"  |sourceurl{i+1}={stp(url)}" for i, url in enumerate(volume["file_path"])
+                        source_url_fields += "\n".join(
+                            f"  |sourceurl{i+1}={stp(url)}"
+                            for i, url in enumerate(volume["file_path"])
                         )
                     primary_volume_wikitext = f"""=={{{{int:filedesc}}}}==
 {{{{{booknavi}|prev={prev_filename or ""}|next={next_filename or ""}|nth={nth}|total={len(volumes)}|catid={book['of_category_id']}|db={volume["of_collection_name"]}|dbid={dbid}|bookid={book["id"]}|volumeid={volume["id"]}}}}}
