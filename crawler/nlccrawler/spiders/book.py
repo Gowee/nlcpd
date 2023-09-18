@@ -111,7 +111,7 @@ class BookSpider(scrapy.Spider):
                 of_category_id=self.category,
                 of_category_name=category_name,
             )
-            if page == self.end_page:
+            if self.end_page > 0 and page == self.end_page:
                 return
             page += 1
             yield response.follow(
