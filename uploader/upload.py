@@ -378,6 +378,8 @@ def main():
             and book["introduction"]
         )
 
+        if isinstance(book["id"], str):
+            book["id"] = book["id"].strip()
         dbid = book["of_collection_name"].removeprefix("data_")
 
         capping = name_fixes.get((str(dbid), str(book["id"])))
@@ -459,6 +461,8 @@ def main():
             def genvols():
                 seen_file_paths = set()
                 for ivol, volume in enumerate(volumes):
+                    if isinstance(volume["id"], str):
+                        volume["id"] = volume["id"].strip()
                     abstract = metadata.get(
                         abstract_from_metadata_field,
                         book["introduction"].replace("###", "@@@").replace("@@@", "\n")

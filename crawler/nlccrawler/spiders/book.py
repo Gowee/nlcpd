@@ -181,8 +181,8 @@ class BookSpider(scrapy.Spider):
                 assert (
                     match
                 ), f"Failed to parse the side by side button of the {vidx+1} volume of the book {book_id}"
-                volume_id = match.group(1).removesuffix(".0")
-                secondary_volume_id = match.group(2).removesuffix(".0")
+                volume_id = match.group(1).removesuffix(".0").strip()
+                secondary_volume_id = match.group(2).removesuffix(".0").strip()
                 file_path = match.group(4)
                 secondary_volume_file_path = match.group(5)
                 response.meta.update(
@@ -218,7 +218,7 @@ class BookSpider(scrapy.Spider):
             ).get():
                 params = dict(parse_qsl(urlparse(image_list_url).query))
                 assert "data_" + (params.get("aid") or "") == collection_name
-                volume_id = params["bid"].removesuffix(".0")
+                volume_id = params["bid"].removesuffix(".0").strip()
                 lid = params["lid"]
                 assert book_id == params.get("did")
                 response.meta.update(
@@ -250,13 +250,13 @@ class BookSpider(scrapy.Spider):
                 volume_url_params = dict(parse_qsl(urlparse(volume_url).query))
                 assert "data_" + (volume_url_params.get("aid") or "") == collection_name
                 # volume_id contains a trailing ".0" somewhere
-                volume_id = volume_url_params["bid"].removesuffix(".0")
+                volume_id = volume_url_params["bid"].removesuffix(".0").strip()
                 # volume_url = urljoin(response.url, volume_url)
 
                 if not self.no_volume:
                     yield response.follow(
                         self.URL_VOLUME_READER.format(
-                            collection_id=collection_name.removeprefix("data_"),
+                            collection_id=collection_name.removeprefix("data_").strip(),
                             volume_id=volume_id,
                         ),
                         priority=self.PRIO_VOLUME,
