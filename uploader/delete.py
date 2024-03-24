@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-""""Request deletion for files in batch"""
+""" "Request deletion for files in batch"""
 
 import yaml
 import os

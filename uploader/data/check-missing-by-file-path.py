@@ -100,15 +100,13 @@ def main():
                         logger.info(
                             f"New file found in {book['id']} {book['name']} ({nth} / {len(volumes)}): {next_file_path}, volume id {vacant_volume_id} used"
                         )
-                        book["volumes"].append(
-                            {
-                                "id": str(vacant_volume_id),
-                                "name": None,
-                                "file_path": next_url,
-                                "toc": [],
-                                "index_in_book": nth - 1,
-                            }
-                        )
+                        book["volumes"].append({
+                            "id": str(vacant_volume_id),
+                            "name": None,
+                            "file_path": next_url,
+                            "toc": [],
+                            "index_in_book": nth - 1,
+                        })
                         vacant_volume_id += 1
                         vcnt += 1
                         missing = True

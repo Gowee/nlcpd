@@ -16,7 +16,7 @@ def main():
 
     def f(book):
         if len(book["volumes"]) > 15:
-            print(book['name'], book['author'])
+            print(book["name"], book["author"])
             return True  # mostly copyright held by non-natural persons
         if re.search(
             r"19[01][0-9]|192[0-8]|1[0-8][0-9][0-9]",

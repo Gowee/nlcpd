@@ -453,6 +453,8 @@ def main():
 """
                     % title
                 )
+                # if int(dbid) == 496:
+                #     category_wikitext += "[[Category:Newspapers of the Republic of China (1912–1949)]]\n"
                 category_page.text = category_wikitext
                 category_page.save(
                     f"Creating (batch task; nlc:{book['of_collection_name']},{book['id']})",
