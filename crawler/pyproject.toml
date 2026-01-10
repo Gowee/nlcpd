@@ -9,7 +9,7 @@ python = "^3.9"
 Scrapy = "^2.5.0"
 txmongo = "^19.2.0"
 dnspython = "^2.1.0"
-lxml = "^4.9.3" # ensure up to update
+lxml = "^6.0.2" # ensure up to update
 
 [tool.poetry.dev-dependencies]
 

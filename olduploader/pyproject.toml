@@ -7,9 +7,12 @@ authors = ["Hung-I Wang <whygowe@gmail.com>"]
 [tool.poetry.dependencies]
 python = "^3.9"
 pymongo = "^3.11.4"
-mwclient = "^0.10.1"
-PyYAML = "^5.4.1"
+mwclient = "^0.11.0"
+PyYAML = "^6.0.3"
 opencc-py = "^1.1.0"
+zhconv-rs = "^0.4.0"
+more-itertools = "^10.8.0"
+aiohttp = "^3.13.3"
 
 [tool.poetry.dev-dependencies]
 black = "^21.5b2"

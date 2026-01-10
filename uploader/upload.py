@@ -525,7 +525,10 @@ def main():
                 filename,
                 pagename,
                 secondary_task,
-            ) in volsit:
+                ) in volsit:
+                logger.info(filename)
+                # if "511-023031103090455-58788" not in filename:
+                #     continue
                 try:
                     next_filename = volsit.peek()[5]
                 except StopIteration:
@@ -555,7 +558,7 @@ def main():
                     assert all(char not in set(r'["$*|\]</^>@#') for char in filename)
                     page = pywikibot.FilePage(site, pagename)
                     try:
-                        if not page.exists():  # or not page.imageinfo:
+                        if False: #  not page.exists():  # or not page.imageinfo:
                             volume_id = (
                                 volume["id"]
                                 if not secondary
